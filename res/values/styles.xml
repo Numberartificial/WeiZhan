@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="ProgressBarStyle" parent="@android:style/Widget.ProgressBar.Horizontal"/>
+    <style name="anim_menu_bottombar">
+        <item name="android:windowEnterAnimation">@anim/tag_in</item>
+        <item name="android:windowExitAnimation">@anim/tag_out</item>
+    </style>
+
+</resources>
