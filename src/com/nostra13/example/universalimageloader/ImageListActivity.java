@@ -87,6 +87,10 @@ public class ImageListActivity extends ListViewBaseActivity{
 	private Animation mUpA;
 	private RelativeLayout mRe;
 	
+	//tag
+	private int flag;
+	private final int TAG_LOAD_MORE = 0;
+	private final int TAG_SHRINK_UP = 1;
 	Context activity = this;
 
 	@Override
@@ -171,7 +175,8 @@ public class ImageListActivity extends ListViewBaseActivity{
 				startImagePagerActivity(position);
 			}
 		});*/
-			
+		//只显示一行tag数据。
+		flag = TAG_LOAD_MORE;	
 	}
 	
 	public class MyAnimation extends TranslateAnimation {
@@ -470,7 +475,7 @@ public class ImageListActivity extends ListViewBaseActivity{
 		}
 		
 		  @Override  
-	      protected void onPostExecute(List<TagItem> result) {  	  
+	      protected void onPostExecute(List<TagItem> result) {  	
 			  if(taglist ==null ) taglist = new ArrayList<TagItem>();
 			  if(result != null)
 			    {	
@@ -478,7 +483,7 @@ public class ImageListActivity extends ListViewBaseActivity{
 			    }
 			    else
 			    {
-			    	 	taglist.add(new TagItem("您还没有自己的标签，快去创建吧","#A2B5CD","#9400D3"));
+			    	 	taglist.set(0, new TagItem("您还没有自己的标签，快去创建吧."));
 			    }
 			    ShowTagListView();
 	       }  
@@ -493,13 +498,13 @@ public class ImageListActivity extends ListViewBaseActivity{
 		//Tag和Ad必须先初始化。
 		taglist = new ArrayList<TagItem>();
 		
-		taglist.add(new TagItem("Tag正在加载中","#A2B5CD","#9400D3"));
+		taglist.add(new TagItem("Tag正在加载中........"));
 
 		tagview.setDividerHeight(3);
 		tagview.setDividerWidth(20);	
 		adapter = new TagAdapter(this, taglist);
 		tagview.setAdapter(adapter);
-
+		//
 		wzName = "troyside";	
 		
 		DownTagTask task = new DownTagTask(this);
@@ -507,9 +512,10 @@ public class ImageListActivity extends ListViewBaseActivity{
 	}
 
 	private void ShowTagListView(){
-		Log.v("Lich","ShowTagListView");
-		TagAdapter adapter2 = new TagAdapter(this, taglist);
-		tagview.setDividerHeight(3);
+		taglist.add(new TagItem("...","#000000","#f5f5f5"));
+		final TagAdapter adapter2 = new TagAdapter(this, taglist);
+		//设置tag之间的间隔:款和高。
+		tagview.setDividerHeight(10);
 		tagview.setDividerWidth(30);		
 		tagview.setAdapter(adapter2);
 
@@ -524,14 +530,28 @@ public class ImageListActivity extends ListViewBaseActivity{
 				apiParam.put("tag",taglist.get(position).getText());
 				int from = 0;
 				int to = 30;
-				HashMap<String,String> params =  taglist.get(position).getParams();
-					
-				//Toast.makeText(this, "ddd",Toast.LENGTH_LONG).show();
-				//获取微站的ad列表。
-				
-				DownAdTask task = new DownAdTask(activity,from,to,params, 1);
-				task.execute(wzName);
-
+				if(position == taglist.size() - 1 )
+				{
+					if(flag ==TAG_SHRINK_UP)
+					{	
+						adapter2.notifyDataSetChanged(true);
+						taglist.get(position).setText("...");
+						flag =  TAG_LOAD_MORE;
+					}
+					else if(flag == TAG_LOAD_MORE)
+					{	//为TAG_LOAD_MORE时，只显示一行tag
+						adapter2.notifyDataSetChanged(false);
+						taglist.get(position).setText("收起");
+						flag =TAG_SHRINK_UP;
+					}	
+				}
+				else
+				{
+					HashMap<String,String> params =  taglist.get(position).getParams();
+					//获取微站的ad列表。
+					DownAdTask task = new DownAdTask(activity,from,to,params, 1);
+					task.execute(wzName);
+				}
 			}});
 	}
 	
