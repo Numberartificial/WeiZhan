@@ -2,34 +2,80 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content" 
-    android:descendantFocusability="blocksDescendants">
+    android:paddingLeft="20dp"
+    android:paddingRight="20dp"
+    android:paddingTop="20dp">
+	<LinearLayout 
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content" 
+    android:descendantFocusability="blocksDescendants"
+    android:background="#ffffffff"
+    android:orientation="vertical">
 
-    <TextView 
-        android:id="@+id/list_item_info_title"
+     <include android:id="@+id/list_item_userinfo"    
+        layout="@layout/item_list_image_userinfo" />
+     
+     <TextView
+        android:id="@+id/list_item_text_title"
         android:layout_width="match_parent"
-   		android:layout_height="wrap_content"
-   		android:textSize="24sp"
-   		android:paddingLeft="5dp"
-   		android:paddingRight="5dp"/>
-    <ImageView
-        android:id="@+id/list_item_info_image"
-        android:layout_width="130dip"
-        android:layout_height="120dip"
-        android:layout_margin="4dip"
-        android:adjustViewBounds="true"
-        android:contentDescription="@string/descr_image"
-        android:layout_below="@id/list_item_info_title"
-        android:scaleType="centerCrop" />
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:textSize="16sp" 
+        android:textColor="#333333"
+        android:textStyle="bold"/>
+     <TextView
+        android:id="@+id/list_item_text_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:textSize="14sp"
+        android:textColor="#999999" />
+    <RelativeLayout
+        android:layout_width="fill_parent"
+    	android:layout_height="44dp" 
+        android:layout_marginTop="14dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+  		android:background="@drawable/btn_voice_bg">
+           <Button
+	        android:id="@+id/list_item_bt_voice"
+	        android:layout_width="20dp"
+	        android:layout_height="20dp"
+	        android:layout_centerHorizontal="true"
+	        android:layout_centerVertical="true"
+	        android:background="@drawable/icon_voice_play"
+	        android:contentDescription="@string/descr_image"
+	        android:focusable="false" />
+           <TextView
+	       android:id="@+id/list_item_text_voice"
+	       android:layout_width="wrap_content"
+	       android:layout_height="wrap_content"
+	       android:layout_marginLeft="16dp"
+	       android:paddingRight="5dp"
+	       android:layout_toRightOf="@id/list_item_bt_voice"
+		   android:layout_centerVertical="true"
+	       android:textSize="12sp"
+	       android:textColor="#999999" />
+    </RelativeLayout>
 
-    <Button 
-    	android:id="@+id/list_item_info_bt1"
-    	android:layout_width="wrap_content"
-   		android:layout_height="wrap_content" 
-   		android:gravity="center"
-   		android:layout_alignParentBottom="true"
-        android:layout_below="@id/list_item_info_image"
-        android:layout_alignParentRight="true"
-        android:focusable="false"  
-   		android:padding="4dp"/>
+	    <com.util.CustomGallery 
+		    android:id="@+id/list_item_gallery_images"
+		    android:layout_width="fill_parent"
+		    android:layout_height="wrap_content"
+      		android:layout_marginTop="14dp"
+      		android:layout_marginLeft="20dp"
+        	android:layout_marginRight="20dp"
+		    android:layout_gravity="center_vertical"
+		    android:focusable="false"
+		    android:gravity="left|center_vertical"
+		    android:spacing="15dip" />
 
+     <include android:id="@+id/list_item_buttons"    
+        layout="@layout/item_list_image_buttons" />
+
+</LinearLayout>
 </RelativeLayout>

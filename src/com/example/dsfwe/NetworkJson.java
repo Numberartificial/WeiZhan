@@ -40,19 +40,21 @@ public class NetworkJson {
 
 	  }
 
-	  public static ApiResult<List<AdItem>>  getWeiZhanAdList(Context ctx, String wzName,int from,int to,HashMap<String,String> ohterParams) {
+	  public static ApiResult<List<AdItem>>  getWeiZhanAdList(Context ctx, String wzName,int from,int to,HashMap<String,String> otherParams) {
 	     	ApiParams params = new ApiParams();
 	        params.addParam("wz", wzName);
 		  	params.addParam("from",from);
 		  	params.addParam("to",to);
 
-		  	Iterator<Entry<String, String>> iter = ohterParams.entrySet().iterator();
-		  	while(iter.hasNext())
+		  	if (null != otherParams)
 		  	{
-		  		Map.Entry<String, String> entry = (Map.Entry<String, String>) iter.next();
-		  		params.addParam(entry.getKey(),  entry.getValue());
+			  	Iterator<Entry<String, String>> iter = otherParams.entrySet().iterator();
+			  	while(iter.hasNext())
+			  	{
+			  		Map.Entry<String, String> entry = (Map.Entry<String, String>) iter.next();
+			  		params.addParam(entry.getKey(),  entry.getValue());
+			  	}
 		  	}
-
 		  	params.addParam("apiFormatter", "WeiZhanAd");
 	
 	  	   String json = BaseApiCommand.createCommand("weizhan.ads/", true, params).executeSync(ctx);
