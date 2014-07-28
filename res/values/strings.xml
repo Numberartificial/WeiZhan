@@ -7,6 +7,10 @@
     <string name="ac_name_image_grid">Image Grid Example</string>
     <string name="ac_name_image_pager">Image Pager Example</string>
     <string name="ac_name_image_gallery">Image Gallery Example</string>
+    
+    <string name="ac_name_weizhan">微站名</string>
+    <string name="ac_bt_notify">关注微站</string>
+    <string name="ac_edit_search">大家都在热搜 “iphone6”</string>
     <!-- Labels -->
     <string name="label_activity_examples">Activity Examples</string>
     <string name="menu_item_clear_memory_cache">Clear memory cache</string>

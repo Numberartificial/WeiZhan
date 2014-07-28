@@ -9,8 +9,9 @@
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 /*  12:    */
-/*  13:    */public class CustomListView extends LinearLayout
+/*  13:    */public class CustomListView extends RelativeLayout
 /*  14:    */{
 /*  15: 15 */  private String TAG = CustomListView.class.getSimpleName();
 /*  16:    */  private CustomAdapter myCustomAdapter;
