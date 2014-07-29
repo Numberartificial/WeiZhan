@@ -41,6 +41,7 @@ import com.custom.vg.list.CustomListView;
 import com.custom.vg.list.OnItemClickListenerTag;
 import com.custom.vg.list.OnItemLongClickListenerTag;
 import com.example.dsfwe.AdItem;
+import com.example.dsfwe.BlowItem;
 import com.example.dsfwe.NetworkJson;
 import com.example.dsfwe.TagAdapter;
 import com.example.dsfwe.TagItem;
@@ -71,8 +72,16 @@ public class ImageListActivity extends ListViewBaseActivity{
 
 	private  final static int REFRESH =1;
 	private  final static int LOAD =2;
+	private final static int blow_times = 1;
+	private  int blow = 0;
+	private BlowItem blowItem; 
+	private AdItem blowAdItem;
+	
+	private String blowAdId;//标识哪个ad被吹上去l
+	
 	private InfoAdapter mAdapter;
 	private List<AdItem> adlist; 
+
 	
 	private static int delay_time = 0;
 	private Handler mHandler;
@@ -149,6 +158,8 @@ public class ImageListActivity extends ListViewBaseActivity{
 		initTag();
 	
 		adlist = new ArrayList<AdItem>();
+		blowItem = new BlowItem();
+
 		listView = (XListView) findViewById(R.id.xListView);
 		listView.setClickable(true);
 		listView.setPullLoadEnable(true);
@@ -275,6 +286,9 @@ public class ImageListActivity extends ListViewBaseActivity{
 		}
 	}
 	
+	
+	
+	
 	private class CustomGalleryAdapter extends BaseAdapter {
 		List<String> urls;
 		CustomGalleryAdapter(List<String> urls){
@@ -306,6 +320,8 @@ public class ImageListActivity extends ListViewBaseActivity{
 		}
 	}
 	
+	
+	
 	private class InfoAdapter extends BaseAdapter{
 		private List<AdItem> list;
 		private Context con;
@@ -323,6 +339,7 @@ public class ImageListActivity extends ListViewBaseActivity{
 		public View getView(int position, View convertView, ViewGroup parent){
 			View view = convertView;
 			final ViewHolder holder;
+			final int pos = position;
 			if (convertView == null) {
 				view = inflater.inflate(R.layout.item_list_image, parent, false);
 				holder = new ViewHolder();
@@ -335,6 +352,7 @@ public class ImageListActivity extends ListViewBaseActivity{
 				holder.ad.content = (TextView)view.findViewById(R.id.list_item_text_content);
 				holder.ad.voice = (Button)view.findViewById(R.id.list_item_bt_voice);
 				holder.ad.voice_play = (TextView)view.findViewById(R.id.list_item_text_voice);
+				
 				holder.ad.images = (CustomGallery)view.findViewById(R.id.list_item_gallery_images);
 				holder.buttons.bt_share = (Button)view.findViewById(R.id.list_item_bt_share);
 				holder.buttons.bt_collect = (Button)view.findViewById(R.id.list_item_bt_collect);
@@ -346,6 +364,7 @@ public class ImageListActivity extends ListViewBaseActivity{
 
 			AdItem now = getItem(position);
 			imageLoader.displayImage(now.getUserImage(), holder.userinfo.head, options, animateFirstListener);
+			
 			holder.userinfo.username.setText(now.getUserName());
 			holder.ad.price.setText("" + now.getPrice());
 			holder.ad.title.setText(now.getTitle());
@@ -353,6 +372,7 @@ public class ImageListActivity extends ListViewBaseActivity{
 			holder.ad.voice.setFocusable(false);
 			holder.ad.voice_play.setText("23\"");
 			holder.ad.images.setFocusable(false);
+			
 			List<String> urls = new ArrayList<String>();
 			List<String> s = now.getImages();
 			if (null != s)
@@ -361,19 +381,27 @@ public class ImageListActivity extends ListViewBaseActivity{
 					urls.add(str);
 				}
 			}
+			//为Gallery 设置图片数组。
 			holder.ad.images.setAdapter(new CustomGalleryAdapter(urls){});
+			
 			//holder.buttons.bt_share.setText("分享");
 			//holder.buttons.bt_collect.setText("收藏");
 			//holder.buttons.bt_blow.setText("吹上去");
 			//listView 中有button控件时，必须将子控件的focusable设置为false,其本身才能捕获到click
 			holder.buttons.bt_blow.setFocusable(false);
 			holder.buttons.bt_blow.setClickable(true);
+			
 			holder.buttons.bt_blow.setOnClickListener(new OnClickListener(){
-
 				@Override
 				public void onClick(View v) {
 					// TODO Auto-generated method stub
-					popWindowDo();
+					//popWindowDo();
+					blowAdId = getItem(pos).getId();
+					blowAdId = blowAdId.substring(1,blowAdId.length());
+					blowAdItem = getItem(pos);
+					//吹上去
+					onBlowUp();
+				
 				}});
 			return view;
 		}
@@ -413,6 +441,10 @@ public class ImageListActivity extends ListViewBaseActivity{
 		}
 	}
 	
+	
+	
+	
+	
 	private void geneItems(int doWhat) {
 		int num = 10;
 		DownAdTask task;
@@ -423,6 +455,7 @@ public class ImageListActivity extends ListViewBaseActivity{
 			int size = adlist.size();
 			task = new DownAdTask(activity,size,size + num - 1,null, doWhat);
 		}
+	
 		task.execute(wzName);
 	}
 
@@ -449,26 +482,58 @@ public class ImageListActivity extends ListViewBaseActivity{
 			}
 		}, delay_time);
 	}
+	
+	public void onBlowUp()
+	{
+		//通知服务器改变顺序，接收了则改变本地的顺序，否则，不改变。
+		
+		DownBlowFlagTask task = new DownBlowFlagTask(this);
+		task.execute(wzName);
 
-	private class DownTagTask extends AsyncTask<String,String,List<TagItem>>
+	}
+	
+	public void executeBlowUp()
+	{
+		if(blowItem != null && blowItem.getFlag())//通知服务器改变顺序。成功的话，刷新页面。
+		{	
+			if(blow < blow_times)
+			{	
+				blow++;
+				adlist.remove(blowAdItem);
+				adlist.add(0,blowAdItem);
+				mAdapter.notifyDataSetChanged();
+			
+				Toast.makeText(activity, "吹上去了", Toast.LENGTH_SHORT).show();
+			}
+			else
+			{
+				Toast.makeText(activity, "吹不动了,快去交朋友下载app来吹吧", Toast.LENGTH_SHORT).show();
+			}
+		}
+		else		
+		{
+			Toast.makeText(activity, "吹失败啦,检查一下您的网络吧", Toast.LENGTH_SHORT).show();
+		}
+	}
+	
+	private class DownBlowFlagTask extends AsyncTask<String,String,BlowItem>
 	{
 		 Context ctx;
-		public DownTagTask(Context ctx)
+		public DownBlowFlagTask(Context ctx)
 		{
 			this.ctx = ctx;
 		}
 
 		@Override
-		protected List<TagItem> doInBackground(String... arg0) {
+		protected BlowItem doInBackground(String... arg0) {
 			try{
 					if(wzName == "")
 					{
 						return null;
 					}
 					else
-					{	
-						taglist = NetworkJson.getWeiZhanTagList(ctx, wzName).getResult();	
-						return taglist;
+					{	blowItem = NetworkJson.getWeiZhanBlowFlag(ctx, wzName, blowAdId).getResult();
+						return blowItem;
 					}
 			}catch(Exception e){
 					
@@ -478,19 +543,14 @@ public class ImageListActivity extends ListViewBaseActivity{
 		}
 		
 		  @Override  
-	      protected void onPostExecute(List<TagItem> result) {  	
-			  if(taglist ==null ) taglist = new ArrayList<TagItem>();
-			  if(result != null)
-			    {	
-			    	 taglist = result;
-			    }
-			    else
-			    {
-			    	 	taglist.set(0, new TagItem("您还没有自己的标签，快去创建吧."));
-			    }
-			    ShowTagListView();
+	      protected void onPostExecute(BlowItem result) {  
+			  	if(blowItem ==null ) blowItem = new BlowItem();
+			  	blowItem = 	result;
+			   	executeBlowUp();
 	       }  
 	}
+
+	
 	private void initTag()
 	{
 		ApiConfiguration.config("www.zhaoyiru.baixing.cn", null, "api_androidbaixing",
@@ -570,7 +630,47 @@ public class ImageListActivity extends ListViewBaseActivity{
 				}
 			}});
 	}
-	
+	private class DownTagTask extends AsyncTask<String,String,List<TagItem>>
+	{
+		 Context ctx;
+		public DownTagTask(Context ctx)
+		{
+			this.ctx = ctx;
+		}
+
+		@Override
+		protected List<TagItem> doInBackground(String... arg0) {
+			try{
+					if(wzName == "")
+					{
+						return null;
+					}
+					else
+					{	
+						taglist = NetworkJson.getWeiZhanTagList(ctx, wzName).getResult();	
+						return taglist;
+					}
+			}catch(Exception e){
+					
+				e.printStackTrace();
+			}
+			return null;
+		}
+		
+		  @Override  
+	      protected void onPostExecute(List<TagItem> result) {  	
+			  if(taglist ==null ) taglist = new ArrayList<TagItem>();
+			  if(result != null)
+			    {	
+			    	 taglist = result;
+			    }
+			    else
+			    {
+			    	 	taglist.set(0, new TagItem("您还没有自己的标签，快去创建吧."));
+			    }
+			    ShowTagListView();
+	       }  
+	}
 	private class DownAdTask extends AsyncTask<String,String,List<AdItem>>
 	{
 		 Context ctx;
@@ -585,6 +685,7 @@ public class ImageListActivity extends ListViewBaseActivity{
 			this.params = params;
 			this.doWhat = doWhat;
 		}
+
 		@Override
 		protected List<AdItem> doInBackground(String... arg0) {
 			try{
@@ -594,7 +695,8 @@ public class ImageListActivity extends ListViewBaseActivity{
 				}
 				else
 				{	
-					return NetworkJson.getWeiZhanAdList(ctx, wzName, from, to, params).getResult();	
+						return NetworkJson.getWeiZhanAdList(ctx, wzName, from, to, params).getResult();	
+				
 				}
 			}catch(Exception e){
 				e.printStackTrace();

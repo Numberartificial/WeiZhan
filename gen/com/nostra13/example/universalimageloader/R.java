@@ -37,12 +37,12 @@ public final class R {
         public static final int gridview=0x7f090001;
         public static final int icon=0x7f09001c;
         public static final int image=0x7f09000c;
-        public static final int image_left=0x7f090023;
-        public static final int image_right=0x7f090024;
-        public static final int item_clear_disc_cache=0x7f09002f;
-        public static final int item_clear_memory_cache=0x7f09002e;
-        public static final int item_pause_on_fling=0x7f090031;
-        public static final int item_pause_on_scroll=0x7f090030;
+        public static final int image_left=0x7f090022;
+        public static final int image_right=0x7f090023;
+        public static final int item_clear_disc_cache=0x7f09002e;
+        public static final int item_clear_memory_cache=0x7f09002d;
+        public static final int item_pause_on_fling=0x7f090030;
+        public static final int item_pause_on_scroll=0x7f09002f;
         public static final int list_bt_name=0x7f090006;
         public static final int list_bt_notify=0x7f090004;
         public static final int list_edit_search=0x7f090007;
@@ -65,7 +65,6 @@ public final class R {
         public static final int list_text_title_name=0x7f090005;
         public static final int list_title=0x7f090002;
         public static final int loading=0x7f09001b;
-        public static final int more_btn=0x7f090022;
         public static final int pager=0x7f09000b;
         public static final int progress=0x7f09000d;
         public static final int sexangleView=0x7f090021;
@@ -73,15 +72,15 @@ public final class R {
         public static final int title=0x7f09001d;
         public static final int tog_pop_linear=0x7f090020;
         public static final int xListView=0x7f09000a;
-        public static final int xlistview_footer_content=0x7f090025;
-        public static final int xlistview_footer_hint_textview=0x7f090027;
-        public static final int xlistview_footer_progressbar=0x7f090026;
-        public static final int xlistview_header_arrow=0x7f09002c;
-        public static final int xlistview_header_content=0x7f090028;
-        public static final int xlistview_header_hint_textview=0x7f09002a;
-        public static final int xlistview_header_progressbar=0x7f09002d;
-        public static final int xlistview_header_text=0x7f090029;
-        public static final int xlistview_header_time=0x7f09002b;
+        public static final int xlistview_footer_content=0x7f090024;
+        public static final int xlistview_footer_hint_textview=0x7f090026;
+        public static final int xlistview_footer_progressbar=0x7f090025;
+        public static final int xlistview_header_arrow=0x7f09002b;
+        public static final int xlistview_header_content=0x7f090027;
+        public static final int xlistview_header_hint_textview=0x7f090029;
+        public static final int xlistview_header_progressbar=0x7f09002c;
+        public static final int xlistview_header_text=0x7f090028;
+        public static final int xlistview_header_time=0x7f09002a;
     }
     public static final class layout {
         public static final int ac_home=0x7f030000;

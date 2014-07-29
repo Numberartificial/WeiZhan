@@ -1,6 +1,4 @@
 package com.custom.vg.list;
-import com.nostra13.example.universalimageloader.R;
-
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Looper;
@@ -16,10 +14,12 @@ public class CustomListView extends RelativeLayout
 	private CustomAdapter myCustomAdapter;
 	private static boolean addChildType;
 	private static boolean  loadMoreFlag;
+	private boolean flag; //防止多显示一次更多按钮。
     public CustomListView(Context context, AttributeSet attrs) 
 	{ 
 		super(context, attrs); 
 		loadMoreFlag = true;
+		flag =true;
 	}
 	public static void setSLoadMoreFlag(boolean flag)
 	{
@@ -67,6 +67,9 @@ public class CustomListView extends RelativeLayout
 					child.layout(lengthX - width, lengthY - height, lengthX, lengthY);
 				}
 			}
+			if(!flag)
+				flag =true;
+			else
 			more_tag.layout(argRight - more_width, argBottom - more_height, argRight, argBottom);
 	    }	
 		else
@@ -93,14 +96,15 @@ public class CustomListView extends RelativeLayout
 				 }
 				if (lengthX > argRight)
 				{		
-						lengthX = width;
-						lengthY += getDividerHeight() + height;
-						child.layout(lengthX - width, lengthY - height, lengthX, lengthY);
+					lengthX = width;
+					lengthY += getDividerHeight() + height;
+					child.layout(lengthX - width, lengthY - height, lengthX, lengthY);
 				}
 				else 
 				{
-						child.layout(lengthX - width, lengthY - height, lengthX, lengthY);
+					child.layout(lengthX - width, lengthY - height, lengthX, lengthY);
 				}
+				flag =false;
 			 }
 		 }
          ViewGroup.LayoutParams lp = getLayoutParams();
