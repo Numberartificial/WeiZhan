@@ -1,6 +1,7 @@
 package com.example.dsfwe;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import android.nfc.Tag;
@@ -32,7 +33,8 @@ public class AdItem implements Serializable{
 	private String voice;
 
 					
-	public AdItem() {}
+	public AdItem() {
+	}
 	
 	public AdItem(String id,String title) {
 		this.id = id ;

@@ -8,7 +8,6 @@
 /*   8:    */import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 /*  12:    */
 /*  13:    */public class CustomListView extends RelativeLayout

@@ -15,6 +15,7 @@
  *******************************************************************************/
 package com.nostra13.example.universalimageloader;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -30,7 +31,9 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Animation;
+import android.view.animation.ScaleAnimation;
 import android.view.animation.Transformation;
 import android.view.animation.TranslateAnimation;
 import android.widget.*;
@@ -50,7 +53,6 @@ import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer;
 import com.nostra13.universalimageloader.core.display.RoundedBitmapDisplayer;
-import com.util.CustomGallery;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -58,7 +60,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-import me.maxwin.view.Info;
 import me.maxwin.view.XListView;
 import me.maxwin.view.XListView.IXListViewListener;
 
@@ -76,6 +77,8 @@ public class ImageListActivity extends ListViewBaseActivity{
 	
 	private static int delay_time = 0;
 	private Handler mHandler;
+	
+	LinearLayout searchView;
 	
 	private LinearLayout tags;
 	private CustomListView tagview;
@@ -136,6 +139,7 @@ public class ImageListActivity extends ListViewBaseActivity{
 		TextView text = (TextView)mRe.findViewById(R.id.list_text_title_name);
 		text.setText("微站名");
 	
+		searchView = (LinearLayout)findViewById(R.id.list_view_search);
 		tags = (LinearLayout)findViewById(R.id.list_tags);
 		tags.setVisibility(View.VISIBLE);
 		tagview = (CustomListView)tags.findViewById(R.id.list_sexangleView);	
@@ -186,14 +190,16 @@ public class ImageListActivity extends ListViewBaseActivity{
             super(fromX, toX, fromY, toY);
             mView = view;
             mLayoutParams = (LinearLayout.LayoutParams) view.getLayoutParams();
+            //mLayoutParams.
             int height = mView.getHeight();
             mMarginTopFromY = (int) (height *(fromY - 1)) + mLayoutParams.topMargin;
             mMarginTopToY = (int) (height * (toY - 1)) + mLayoutParams.topMargin;
+            RelativeLayout.LayoutParams mm;
         }
 
         @Override
         protected void applyTransformation(float interpolatedTime, Transformation t) {
-            super.applyTransformation(interpolatedTime, t);
+            //super.applyTransformation(interpolatedTime, t);
             if (interpolatedTime < 1.0f) {
                 int newMarginTop = mMarginTopFromY
                         + (int) ((mMarginTopToY - mMarginTopFromY) * interpolatedTime);
@@ -204,22 +210,63 @@ public class ImageListActivity extends ListViewBaseActivity{
             }
         }
 	}
+	public class MyAnimation2 extends TranslateAnimation {
+
+        private View mView;
+        
+        private float y;
+
+        private LinearLayout.LayoutParams mLayoutParams;
+
+        private int mMarginTopFromY, mMarginTopToY;
+
+        public MyAnimation2(float fromX, float toX, float fromY, float toY, View view) {
+            super(fromX, toX, fromY, toY);
+            mView = view;
+            mLayoutParams = (LinearLayout.LayoutParams) view.getLayoutParams();
+            //mLayoutParams.
+            int height = mView.getHeight();
+            mMarginTopFromY = (int) (height *(fromY - 1)) + mLayoutParams.topMargin;
+            mMarginTopToY = (int) (height * (toY - 1)) + mLayoutParams.topMargin;
+            RelativeLayout.LayoutParams mm;
+            y = toY;
+        }
+
+        @SuppressLint("NewApi") @Override
+        protected void applyTransformation(float interpolatedTime, Transformation tran) {
+            //super.applyTransformation(interpolatedTime, tran);
+            if (interpolatedTime < 1.0f) {
+                int newBottom = mView.getBottom() + (int)(y * interpolatedTime);
+                int l=mView.getLeft(); 
+                int b=mView.getBottom() + (int)(y * interpolatedTime);;
+                int r=mView.getRight();
+                int t=mView.getTop();
+                mView.layout(l, t, r, b);
+                mView.postInvalidate();
+                mView.getParent().requestLayout();
+            } else {
+                mView.setVisibility(View.INVISIBLE);
+            }
+        }
+	}
 	public void popWindowDo(){
-		float height = tags.getHeight();
+		float height = tagview.getHeight();
 		if (View.VISIBLE != tags.getVisibility()){
+			tags.setVisibility(View.VISIBLE);
             mDownA = new MyAnimation(0.0f, 0.0f, 1.0f, 2.0f, tags);
+            //TranslateAnimation();
+          //  mDownA = new MyAnimation2(0.0f, 0.0f, 0.0f, height, tags); 
             mDownA.setDuration(300);
            // mDownA.setFillAfter(true);
-            tags.startAnimation(mDownA);
-			tags.setVisibility(View.VISIBLE);
+            searchView.startAnimation(mDownA);
 		}
 		else
 			if (View.VISIBLE == tags.getVisibility()){
                 mUpA = new MyAnimation(0.0f, 0.0f, 1.0f, 0.0f, tags);
+               // mUpA = new MyAnimation2(0.0f, 0.0f, 0.0f, -height, tags); 
                 mUpA.setDuration(300);
               //  mUpA.setFillAfter(true);
-                tags.startAnimation(mUpA);
-				tags.setVisibility(View.INVISIBLE);
+                searchView.startAnimation(mUpA);
 			}
 	}
 	
@@ -258,7 +305,7 @@ public class ImageListActivity extends ListViewBaseActivity{
 			TextView content;
 			Button voice;
 			TextView voice_play;
-			CustomGallery images;
+			LinearLayout image_scroll;
 		}
 		private class Buttons{
 			Button bt_share;
@@ -327,7 +374,7 @@ public class ImageListActivity extends ListViewBaseActivity{
 				holder.ad.content = (TextView)view.findViewById(R.id.list_item_text_content);
 				holder.ad.voice = (Button)view.findViewById(R.id.list_item_bt_voice);
 				holder.ad.voice_play = (TextView)view.findViewById(R.id.list_item_text_voice);
-				holder.ad.images = (CustomGallery)view.findViewById(R.id.list_item_gallery_images);
+				holder.ad.image_scroll = (LinearLayout)view.findViewById(R.id.image_scroll_add);
 				holder.buttons.bt_share = (Button)view.findViewById(R.id.list_item_bt_share);
 				holder.buttons.bt_collect = (Button)view.findViewById(R.id.list_item_bt_collect);
 				holder.buttons.bt_blow = (Button)view.findViewById(R.id.list_item_bt_blow);
@@ -344,19 +391,24 @@ public class ImageListActivity extends ListViewBaseActivity{
 			holder.ad.content.setText(now.getContent());
 			holder.ad.voice.setFocusable(false);
 			holder.ad.voice_play.setText("23\"");
-			holder.ad.images.setFocusable(false);
-			List<String> urls = new ArrayList<String>();
+			//很重要
+			holder.ad.image_scroll.removeAllViews();
+			//List<String> urls = new ArrayList<String>();
 			List<String> s = now.getImages();
 			if (null != s)
 			{
-				for (String str : s){
-					urls.add(str);
+				for (int i = 0; i < s.size(); i++){
+			    	ImageView iView = new ImageView(ImageListActivity.this);
+					imageLoader.displayImage(s.get(i), iView, g_options);
+					LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(180, 180);
+					lp.leftMargin = 6;
+					lp.rightMargin = 6;
+					iView.setId(i);//设置这个View 的id 
+					iView.setLayoutParams(lp);
+					holder.ad.image_scroll.addView(iView);
 				}
+			}else{
 			}
-			holder.ad.images.setAdapter(new CustomGalleryAdapter(urls){});
-			//holder.buttons.bt_share.setText("分享");
-			//holder.buttons.bt_collect.setText("收藏");
-			//holder.buttons.bt_blow.setText("吹上去");
 			//listView 中有button控件时，必须将子控件的focusable设置为false,其本身才能捕获到click
 			holder.buttons.bt_blow.setFocusable(false);
 			holder.buttons.bt_blow.setClickable(true);
