@@ -91,6 +91,9 @@ public class ImageListActivity extends ListViewBaseActivity{
 	private int flag;
 	private final int TAG_LOAD_MORE = 0;
 	private final int TAG_SHRINK_UP = 1;
+	private int lastTag = -1;
+	private String lastBgColor;
+	
 	Context activity = this;
 
 	@Override
@@ -512,12 +515,14 @@ public class ImageListActivity extends ListViewBaseActivity{
 	}
 
 	private void ShowTagListView(){
-		taglist.add(new TagItem("...","#000000","#f5f5f5"));
+		
+		taglist.add(new TagItem("更多","#000000","#f5f5f5"));
 		final TagAdapter adapter2 = new TagAdapter(this, taglist);
 		//设置tag之间的间隔:款和高。
 		tagview.setDividerHeight(10);
 		tagview.setDividerWidth(30);		
 		tagview.setAdapter(adapter2);
+		//上次点击的tag。
 
 		tagview.setOnItemClickListenerTag(new OnItemClickListenerTag(){
 
@@ -535,7 +540,7 @@ public class ImageListActivity extends ListViewBaseActivity{
 					if(flag ==TAG_SHRINK_UP)
 					{	
 						adapter2.notifyDataSetChanged(true);
-						taglist.get(position).setText("...");
+						taglist.get(position).setText("更多");
 						flag =  TAG_LOAD_MORE;
 					}
 					else if(flag == TAG_LOAD_MORE)
@@ -547,6 +552,17 @@ public class ImageListActivity extends ListViewBaseActivity{
 				}
 				else
 				{
+					if(position != lastTag)
+					{	
+						if(lastTag != -1)
+							taglist.get(lastTag).setBgColor(lastBgColor);
+						lastTag = position;
+						lastBgColor = taglist.get(position).getBgColor();
+						//点击之后变色。
+						taglist.get(position).setBgColor("#000000");
+					}
+					boolean flag1 = (flag== TAG_LOAD_MORE) ? true:false;
+					adapter2.notifyDataSetChanged(flag1);
 					HashMap<String,String> params =  taglist.get(position).getParams();
 					//获取微站的ad列表。
 					DownAdTask task = new DownAdTask(activity,from,to,params, 1);

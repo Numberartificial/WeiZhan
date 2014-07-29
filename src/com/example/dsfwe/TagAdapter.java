@@ -3,6 +3,10 @@ import java.util.List;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
+import android.text.style.ImageSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -52,13 +56,23 @@ public class TagAdapter extends CustomAdapter {
 		}else{
 			vh = (ViewHolder) convertView.getTag();
 		}
-		
 		TagItem tag = list.get(position);
-
-		vh.tv.setText(tag.getText());
-		vh.tv.setBackgroundColor( Color.parseColor(tag.getBgColor()));
-		vh.tv.setTextColor( Color.parseColor(tag.getColor()));
-
+//		if(position == list.size() -1 && (tag.getText() == "收起"))
+//		{	
+//			SpannableStringBuilder sb = new SpannableStringBuilder();
+//			ImageSpan imgspan = new ImageSpan(con,R.drawable.btn_downarrow);
+//			SpannableString ss = new SpannableString("More..");
+//			ss.setSpan(imgspan, ss.length() -1, ss.length(), Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+//			sb.append(ss);
+//			vh.tv.setText(sb);
+//		}
+//		else
+//		{	
+			vh.tv.setText(tag.getText());
+			vh.tv.setBackgroundColor( Color.parseColor(tag.getBgColor()));
+			if(tag.getText() != "收起"&&tag.getText() != "更多")
+				vh.tv.setTextColor( Color.parseColor(tag.getColor()));
+//		}
 		return convertView;
 	}
 	
