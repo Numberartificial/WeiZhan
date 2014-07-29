@@ -85,10 +85,18 @@ public class ImageListActivity extends ListViewBaseActivity{
 	private List<TagItem> taglist = null;
 	private TagAdapter adapter;
 	private String wzName;
+	private boolean showTags = true;
 	
 	private Animation mDownA;
 	private Animation mUpA;
 	private RelativeLayout mRe;
+	
+	//tag
+	private int flag;
+	private final int TAG_LOAD_MORE = 0;
+	private final int TAG_SHRINK_UP = 1;
+	private int lastTag = -1;
+	private String lastBgColor;
 	
 	Context activity = this;
 
@@ -175,99 +183,51 @@ public class ImageListActivity extends ListViewBaseActivity{
 				startImagePagerActivity(position);
 			}
 		});*/
-			
+		//只显示一行tag数据。
+		flag = TAG_LOAD_MORE;	
 	}
-	
-	public class MyAnimation extends TranslateAnimation {
-
-        private View mView;
+	public class MyAnimation extends Animation {
+        private int y;
+        private int lastAdd;
 
         private LinearLayout.LayoutParams mLayoutParams;
-
-        private int mMarginTopFromY, mMarginTopToY;
-
-        public MyAnimation(float fromX, float toX, float fromY, float toY, View view) {
-            super(fromX, toX, fromY, toY);
-            mView = view;
-            mLayoutParams = (LinearLayout.LayoutParams) view.getLayoutParams();
-            //mLayoutParams.
-            int height = mView.getHeight();
-            mMarginTopFromY = (int) (height *(fromY - 1)) + mLayoutParams.topMargin;
-            mMarginTopToY = (int) (height * (toY - 1)) + mLayoutParams.topMargin;
-            RelativeLayout.LayoutParams mm;
-        }
-
-        @Override
-        protected void applyTransformation(float interpolatedTime, Transformation t) {
-            //super.applyTransformation(interpolatedTime, t);
-            if (interpolatedTime < 1.0f) {
-                int newMarginTop = mMarginTopFromY
-                        + (int) ((mMarginTopToY - mMarginTopFromY) * interpolatedTime);
-                mLayoutParams.setMargins(mLayoutParams.leftMargin, newMarginTop,
-                    mLayoutParams.rightMargin, mLayoutParams.bottomMargin);
-                mView.getParent().requestLayout();
-            } else {
-            }
-        }
-	}
-	public class MyAnimation2 extends TranslateAnimation {
-
-        private View mView;
         
-        private float y;
-
-        private LinearLayout.LayoutParams mLayoutParams;
-
-        private int mMarginTopFromY, mMarginTopToY;
-
-        public MyAnimation2(float fromX, float toX, float fromY, float toY, View view) {
-            super(fromX, toX, fromY, toY);
-            mView = view;
-            mLayoutParams = (LinearLayout.LayoutParams) view.getLayoutParams();
-            //mLayoutParams.
-            int height = mView.getHeight();
-            mMarginTopFromY = (int) (height *(fromY - 1)) + mLayoutParams.topMargin;
-            mMarginTopToY = (int) (height * (toY - 1)) + mLayoutParams.topMargin;
-            RelativeLayout.LayoutParams mm;
+        public MyAnimation(int toY) {
             y = toY;
+            lastAdd = 0;
         }
 
         @SuppressLint("NewApi") @Override
         protected void applyTransformation(float interpolatedTime, Transformation tran) {
-            //super.applyTransformation(interpolatedTime, tran);
             if (interpolatedTime < 1.0f) {
-                int newBottom = mView.getBottom() + (int)(y * interpolatedTime);
-                int l=mView.getLeft(); 
-                int b=mView.getBottom() + (int)(y * interpolatedTime);;
-                int r=mView.getRight();
-                int t=mView.getTop();
-                mView.layout(l, t, r, b);
-                mView.postInvalidate();
-                mView.getParent().requestLayout();
+
+                int now = (int)(interpolatedTime * y);
+            	mLayoutParams = (LinearLayout.LayoutParams) tags.getLayoutParams();
+            	mLayoutParams.setMargins(mLayoutParams.leftMargin, mLayoutParams.topMargin,
+                        mLayoutParams.rightMargin, mLayoutParams.bottomMargin + (now - lastAdd));
+                lastAdd = now;
+            	tags.getParent().requestLayout();
             } else {
-                mView.setVisibility(View.INVISIBLE);
+
             }
         }
 	}
 	public void popWindowDo(){
-		float height = tagview.getHeight();
-		if (View.VISIBLE != tags.getVisibility()){
-			tags.setVisibility(View.VISIBLE);
-            mDownA = new MyAnimation(0.0f, 0.0f, 1.0f, 2.0f, tags);
-            //TranslateAnimation();
-          //  mDownA = new MyAnimation2(0.0f, 0.0f, 0.0f, height, tags); 
+		int offset = 5;
+		int height = tags.getHeight() + offset;
+		if (!showTags){
+    		//tagview.setVisibility(View.VISIBLE);
+            mDownA = new MyAnimation(height); 
             mDownA.setDuration(300);
-           // mDownA.setFillAfter(true);
             searchView.startAnimation(mDownA);
+            showTags = true;
 		}
-		else
-			if (View.VISIBLE == tags.getVisibility()){
-                mUpA = new MyAnimation(0.0f, 0.0f, 1.0f, 0.0f, tags);
-               // mUpA = new MyAnimation2(0.0f, 0.0f, 0.0f, -height, tags); 
+		else{
+                mUpA = new MyAnimation(-height); 
                 mUpA.setDuration(300);
-              //  mUpA.setFillAfter(true);
                 searchView.startAnimation(mUpA);
-			}
+                showTags = false;
+		}
 	}
 	
 	@Override
@@ -308,40 +268,9 @@ public class ImageListActivity extends ListViewBaseActivity{
 			LinearLayout image_scroll;
 		}
 		private class Buttons{
-			Button bt_share;
-			Button bt_collect;
-			Button bt_blow;
-		}
-	}
-	
-	private class CustomGalleryAdapter extends BaseAdapter {
-		List<String> urls;
-		CustomGalleryAdapter(List<String> urls){
-			this.urls = urls;
-		}
-		@Override
-		public int getCount() {
-			return urls.size();
-		}
-
-		@Override
-		public String getItem(int position) {
-			return this.urls.get(position);
-		}
-
-		@Override
-		public long getItemId(int position) {
-			return position;
-		}
-
-		@Override
-		public View getView(int position, View convertView, ViewGroup parent) {
-			ImageView imageView = (ImageView) convertView;
-			if (imageView == null) {
-				imageView = (ImageView) getLayoutInflater().inflate(R.layout.item_gallery_image, parent, false);
-			}
-			imageLoader.displayImage(getItem(position), imageView, g_options);
-			return imageView;
+			RelativeLayout bt_share;
+			RelativeLayout bt_collect;
+			RelativeLayout bt_blow;
 		}
 	}
 	
@@ -375,9 +304,9 @@ public class ImageListActivity extends ListViewBaseActivity{
 				holder.ad.voice = (Button)view.findViewById(R.id.list_item_bt_voice);
 				holder.ad.voice_play = (TextView)view.findViewById(R.id.list_item_text_voice);
 				holder.ad.image_scroll = (LinearLayout)view.findViewById(R.id.image_scroll_add);
-				holder.buttons.bt_share = (Button)view.findViewById(R.id.list_item_bt_share);
-				holder.buttons.bt_collect = (Button)view.findViewById(R.id.list_item_bt_collect);
-				holder.buttons.bt_blow = (Button)view.findViewById(R.id.list_item_bt_blow);
+				holder.buttons.bt_share = (RelativeLayout)view.findViewById(R.id.list_item_bt_share);
+				holder.buttons.bt_collect = (RelativeLayout)view.findViewById(R.id.list_item_bt_collect);
+				holder.buttons.bt_blow = (RelativeLayout)view.findViewById(R.id.list_item_bt_blow);
 				view.setTag(holder);
 			} else {
 				holder = (ViewHolder) view.getTag();
@@ -410,6 +339,7 @@ public class ImageListActivity extends ListViewBaseActivity{
 			}else{
 			}
 			//listView 中有button控件时，必须将子控件的focusable设置为false,其本身才能捕获到click
+			holder.buttons.bt_share.setClickable(true);
 			holder.buttons.bt_blow.setFocusable(false);
 			holder.buttons.bt_blow.setClickable(true);
 			holder.buttons.bt_blow.setOnClickListener(new OnClickListener(){
@@ -522,7 +452,7 @@ public class ImageListActivity extends ListViewBaseActivity{
 		}
 		
 		  @Override  
-	      protected void onPostExecute(List<TagItem> result) {  	  
+	      protected void onPostExecute(List<TagItem> result) {  	
 			  if(taglist ==null ) taglist = new ArrayList<TagItem>();
 			  if(result != null)
 			    {	
@@ -530,7 +460,7 @@ public class ImageListActivity extends ListViewBaseActivity{
 			    }
 			    else
 			    {
-			    	 	taglist.add(new TagItem("您还没有自己的标签，快去创建吧","#A2B5CD","#9400D3"));
+			    	 	taglist.set(0, new TagItem("您还没有自己的标签，快去创建吧."));
 			    }
 			    ShowTagListView();
 	       }  
@@ -545,13 +475,13 @@ public class ImageListActivity extends ListViewBaseActivity{
 		//Tag和Ad必须先初始化。
 		taglist = new ArrayList<TagItem>();
 		
-		taglist.add(new TagItem("Tag正在加载中","#A2B5CD","#9400D3"));
+		taglist.add(new TagItem("Tag正在加载中........"));
 
 		tagview.setDividerHeight(3);
 		tagview.setDividerWidth(20);	
 		adapter = new TagAdapter(this, taglist);
 		tagview.setAdapter(adapter);
-
+		//
 		wzName = "troyside";	
 		
 		DownTagTask task = new DownTagTask(this);
@@ -559,11 +489,14 @@ public class ImageListActivity extends ListViewBaseActivity{
 	}
 
 	private void ShowTagListView(){
-		Log.v("Lich","ShowTagListView");
-		TagAdapter adapter2 = new TagAdapter(this, taglist);
-		tagview.setDividerHeight(3);
+		
+		taglist.add(new TagItem("更多","#000000","#f5f5f5"));
+		final TagAdapter adapter2 = new TagAdapter(this, taglist);
+		//设置tag之间的间隔:款和高。
+		tagview.setDividerHeight(10);
 		tagview.setDividerWidth(30);		
 		tagview.setAdapter(adapter2);
+		//上次点击的tag。
 
 		tagview.setOnItemClickListenerTag(new OnItemClickListenerTag(){
 
@@ -576,14 +509,39 @@ public class ImageListActivity extends ListViewBaseActivity{
 				apiParam.put("tag",taglist.get(position).getText());
 				int from = 0;
 				int to = 30;
-				HashMap<String,String> params =  taglist.get(position).getParams();
-					
-				//Toast.makeText(this, "ddd",Toast.LENGTH_LONG).show();
-				//获取微站的ad列表。
-				
-				DownAdTask task = new DownAdTask(activity,from,to,params, 1);
-				task.execute(wzName);
-
+				if(position == taglist.size() - 1 )
+				{
+					if(flag ==TAG_SHRINK_UP)
+					{	
+						adapter2.notifyDataSetChanged(true);
+						taglist.get(position).setText("更多");
+						flag =  TAG_LOAD_MORE;
+					}
+					else if(flag == TAG_LOAD_MORE)
+					{	//为TAG_LOAD_MORE时，只显示一行tag
+						adapter2.notifyDataSetChanged(false);
+						taglist.get(position).setText("收起");
+						flag =TAG_SHRINK_UP;
+					}	
+				}
+				else
+				{
+					if(position != lastTag)
+					{	
+						if(lastTag != -1)
+							taglist.get(lastTag).setBgColor(lastBgColor);
+						lastTag = position;
+						lastBgColor = taglist.get(position).getBgColor();
+						//点击之后变色。
+						taglist.get(position).setBgColor("#000000");
+					}
+					boolean flag1 = (flag== TAG_LOAD_MORE) ? true:false;
+					adapter2.notifyDataSetChanged(flag1);
+					HashMap<String,String> params =  taglist.get(position).getParams();
+					//获取微站的ad列表。
+					DownAdTask task = new DownAdTask(activity,from,to,params, 1);
+					task.execute(wzName);
+				}
 			}});
 	}
 	

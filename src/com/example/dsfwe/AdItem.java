@@ -20,8 +20,7 @@ import android.nfc.Tag;
 public class AdItem implements Serializable{
 	private static final long serialVersionUID = 1L;
 	private String id;
-	//private String []badges;
-	//private Tag[] highlights;	
+
 	private String title;
 	private String tag;
 	private String content;

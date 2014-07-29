@@ -12,12 +12,14 @@ public class TagItem {
 	
 	public TagItem()
 	{
-		 this.color ="#FFFFFF";
-		 this.bgColor = "#9F79EE";
+		 this.color ="#000000";
+		 this.bgColor = "#f5f5f5";
 	}
+	
 	public TagItem(String text){
 		this.text = text;
-		
+		 this.color ="#000000";
+		 this.bgColor = "#f5f5f5";
 	}
 	
 	public TagItem(String text,String color,String bgColor){
@@ -38,14 +40,12 @@ public class TagItem {
 	public void setColor(String color) {
 		this.color = color;
 	}
-	public void setbgColor(String bgColor)
-	{	
+	public void setBgColor(String bgColor) {
 		this.bgColor = bgColor;
-	}	
+	}
 	public String getBgColor() {
 		return bgColor;
 	}
-
 	public HashMap<String,String> getParams() {
 		return params;
 	}

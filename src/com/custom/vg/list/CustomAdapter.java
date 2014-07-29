@@ -35,9 +35,10 @@
 /*  48:    */    }
 /*  49:    */  }
 /*  50:    */  
-/*  58:    */  public void notifyDataSetChanged()
+/*  58:    */  public void notifyDataSetChanged(boolean loadMoreFlag)
 /*  59:    */  {
 /*  60: 60 */    CustomListView.setAddChildType(true);
+				 CustomListView.setSLoadMoreFlag(loadMoreFlag);
 /*  61: 61 */    notifyCustomListView(this.myCustomListView);
 /*  62:    */  }
 /*  63:    */  
