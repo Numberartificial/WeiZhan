@@ -266,6 +266,10 @@ public class XListView extends ListView implements OnScrollListener {
 
 	@Override
 	public boolean onTouchEvent(MotionEvent ev) {
+		if (mListViewListener.onTouch(ev)){
+			return true;
+		}
+		else {
 		if (mLastY == -1) {
 			mLastY = ev.getRawY();
 		}
@@ -313,6 +317,7 @@ public class XListView extends ListView implements OnScrollListener {
 			break;
 		}
 		return super.onTouchEvent(ev);
+		}
 	}
 
 	@Override
@@ -365,11 +370,13 @@ public class XListView extends ListView implements OnScrollListener {
 	}
 
 	/**
-	 * implements this interface to get refresh/load more event.
+	 * implements this interface to get refresh/load/onTouch more event.
 	 */
 	public interface IXListViewListener {
 		public void onRefresh();
 
 		public void onLoadMore();
+		
+		public boolean onTouch(MotionEvent ev);
 	}
 }

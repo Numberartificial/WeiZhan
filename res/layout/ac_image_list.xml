@@ -47,8 +47,8 @@
 	    
 	     <Button
 	        android:id="@+id/list_bt_name"
-	        android:layout_width="8dp"
-	        android:layout_height="6dp"
+	        android:layout_width="16dp"
+	        android:layout_height="12dp"
 	        android:layout_centerVertical="true"
 	        android:background="@drawable/btn_downarrow" 
 			android:layout_toRightOf="@id/list_text_title_name"/>
@@ -80,9 +80,12 @@
     android:layout_height="wrap_content"
     
     android:layout_marginTop="12dp"
-    android:layout_marginLeft="16dp"
-    android:layout_marginRight="16dp" 
+    android:layout_marginLeft="12dp"
+    android:layout_marginRight="12dp"
+    android:paddingLeft="4dp"
+    android:paddingRight="4dp" 
     android:paddingBottom="12dp"
+    android:background="#66777777"
     android:orientation="horizontal" >
    
     <com.custom.vg.list.CustomListView 
@@ -97,6 +100,7 @@
         android:divider="@null"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent" 
+        android:paddingTop="4dp"
         android:background="#f5f5f5"
         android:cacheColorHint="#00000000">
     </me.maxwin.view.XListView>

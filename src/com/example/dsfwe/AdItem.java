@@ -28,8 +28,10 @@ public class AdItem implements Serializable{
 	private String userImage;
 	private String price;
 	private List<String> images;
+	private List<String> imagesHD;
 	//private List<String> voice;
-	private String voice;
+	private String voiceURL;
+	private String voiceLength;
 
 					
 	public AdItem() {
@@ -106,6 +108,30 @@ public class AdItem implements Serializable{
 
 	public void setImages(List<String> images) {
 		this.images = images;
+	}
+
+	public List<String> getImagesHD() {
+		return imagesHD;
+	}
+
+	public void setImagesHD(List<String> imagesHD) {
+		this.imagesHD = imagesHD;
+	}
+
+	public String getVoiceLength() {
+		return voiceLength;
+	}
+
+	public void setVoiceLength(String voiceLength) {
+		this.voiceLength = voiceLength;
+	}
+
+	public String getVoiceURL() {
+		return voiceURL;
+	}
+
+	public void setVoiceURL(String voiceURL) {
+		this.voiceURL = voiceURL;
 	}
 
 //	public List<String> getVoice() {

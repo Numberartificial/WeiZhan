@@ -7,6 +7,7 @@
     <string name="ac_name_image_grid">Image Grid Example</string>
     <string name="ac_name_image_pager">Image Pager Example</string>
     <string name="ac_name_image_gallery">Image Gallery Example</string>
+    <string name="ac_name_image_search">search and choose WeiZhan</string>
     
     <string name="ac_name_weizhan">微站名</string>
     <string name="ac_bt_notify">关注微站</string>
@@ -35,6 +36,10 @@
     
     <string name="bt_share">分享</string>
     <string name="bt_collect">收藏</string>
-    <string name="bt_blow">吹一下</string>
+    <string name="search_back">返回</string>
+    <string name="bt_blow">吹上去</string>
+    <string name="search_edit">请输入微站名称</string>
+    <string name="search_title">选择微站</string>
+    
 
 </resources>

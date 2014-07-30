@@ -26,6 +26,7 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -33,12 +34,14 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.view.animation.ScaleAnimation;
 import android.view.animation.Transformation;
 import android.view.animation.TranslateAnimation;
 import android.widget.*;
 import android.widget.AdapterView.OnItemClickListener;
 
+import com.util.DensityUtil;
 import com.baixing.network.api.ApiConfiguration;
 import com.custom.vg.list.CustomListView;
 import com.custom.vg.list.OnItemClickListenerTag;
@@ -61,6 +64,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import me.maxwin.view.XListView;
+import me.maxwin.view.XListViewHeader;
 import me.maxwin.view.XListView.IXListViewListener;
 
 
@@ -80,16 +84,20 @@ public class ImageListActivity extends ListViewBaseActivity{
 	
 	LinearLayout searchView;
 	
+	private LinearLayout.LayoutParams mLayoutParams;
+	private int mBottomMargin;
 	private LinearLayout tags;
 	private CustomListView tagview;
 	private List<TagItem> taglist = null;
 	private TagAdapter adapter;
 	private String wzName;
-	private boolean showTags = true;
+	private int showTags = -1;
 	
 	private Animation mDownA;
 	private Animation mUpA;
 	private RelativeLayout mRe;
+	
+	private float mLastY = -1;
 	
 	//tag
 	private int flag;
@@ -109,7 +117,7 @@ public class ImageListActivity extends ListViewBaseActivity{
 		
 		setContentView(R.layout.ac_image_list);
 		//自定义标题栏
-
+		
 		Bundle bundle = getIntent().getExtras();
 		imageUrls = bundle.getStringArray(Extra.IMAGES);
 
@@ -133,7 +141,7 @@ public class ImageListActivity extends ListViewBaseActivity{
 		.bitmapConfig(Bitmap.Config.RGB_565)
 		.displayer(new RoundedBitmapDisplayer(10))
 		.build();
-		
+	
 		mRe = (RelativeLayout)findViewById(R.id.list_title);
 		Button bt = (Button)mRe.findViewById(R.id.list_bt_notify);
 		bt.setOnClickListener(new OnClickListener(){
@@ -144,15 +152,32 @@ public class ImageListActivity extends ListViewBaseActivity{
 				popWindowDo();
 			}});
 		bt = (Button)mRe.findViewById(R.id.list_bt_name);
+		bt.setOnClickListener(new OnClickListener(){
+
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				startSearchActivity();
+			}});
 		TextView text = (TextView)mRe.findViewById(R.id.list_text_title_name);
 		text.setText("微站名");
-	
+		text.setClickable(true);
+		text.setOnClickListener(new OnClickListener(){
+
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				startSearchActivity();
+			}});
 		searchView = (LinearLayout)findViewById(R.id.list_view_search);
 		tags = (LinearLayout)findViewById(R.id.list_tags);
 		tags.setVisibility(View.VISIBLE);
 		tagview = (CustomListView)tags.findViewById(R.id.list_sexangleView);	
 		initTag();
-	
+		mLayoutParams = (LinearLayout.LayoutParams) tags.getLayoutParams();
+		// 记录下正常显示时tagsView的BottomMargin
+		mBottomMargin = mLayoutParams.bottomMargin;
+		
 		adlist = new ArrayList<AdItem>();
 		listView = (XListView) findViewById(R.id.xListView);
 		listView.setClickable(true);
@@ -173,6 +198,10 @@ public class ImageListActivity extends ListViewBaseActivity{
 				ImageListActivity.this.onLoadMore();
 			}
 			
+			@Override
+			public boolean onTouch(MotionEvent ev){
+				return ImageListActivity.this.onTouch(ev);
+			}
 		});
 		mHandler = new Handler();
 		geneItems(REFRESH);
@@ -189,8 +218,6 @@ public class ImageListActivity extends ListViewBaseActivity{
 	public class MyAnimation extends Animation {
         private int y;
         private int lastAdd;
-
-        private LinearLayout.LayoutParams mLayoutParams;
         
         public MyAnimation(int toY) {
             y = toY;
@@ -202,7 +229,6 @@ public class ImageListActivity extends ListViewBaseActivity{
             if (interpolatedTime < 1.0f) {
 
                 int now = (int)(interpolatedTime * y);
-            	mLayoutParams = (LinearLayout.LayoutParams) tags.getLayoutParams();
             	mLayoutParams.setMargins(mLayoutParams.leftMargin, mLayoutParams.topMargin,
                         mLayoutParams.rightMargin, mLayoutParams.bottomMargin + (now - lastAdd));
                 lastAdd = now;
@@ -213,20 +239,25 @@ public class ImageListActivity extends ListViewBaseActivity{
         }
 	}
 	public void popWindowDo(){
-		int offset = 5;
-		int height = tags.getHeight() + offset;
-		if (!showTags){
+		int offset = DensityUtil.dip2px(this, 5);
+		int height;
+		int scale = 2;
+		if (showTags == 1){
     		//tagview.setVisibility(View.VISIBLE);
+			height = mBottomMargin - mLayoutParams.bottomMargin; 
             mDownA = new MyAnimation(height); 
-            mDownA.setDuration(300);
+            mDownA.setDuration(height * scale);
             searchView.startAnimation(mDownA);
-            showTags = true;
+            showTags = -1;
 		}
-		else{
-                mUpA = new MyAnimation(-height); 
-                mUpA.setDuration(300);
+		else
+		if (showTags == 0){
+			    height = mBottomMargin - mLayoutParams.bottomMargin;
+			    height = height - tags.getHeight() - offset;
+                mUpA = new MyAnimation(height); 
+                mUpA.setDuration(- height * scale);
                 searchView.startAnimation(mUpA);
-                showTags = false;
+                showTags = -1;
 		}
 	}
 	
@@ -235,10 +266,16 @@ public class ImageListActivity extends ListViewBaseActivity{
 		super.onBackPressed();
 	}
 
-	private void startImagePagerActivity(int position) {
+	private void startImagePagerActivity(int position, List<String> urls) {
 		Intent intent = new Intent(this, ImagePagerActivity.class);
+		imageUrls = (String[])urls.toArray(new String[0]);
 		intent.putExtra(Extra.IMAGES, imageUrls);
 		intent.putExtra(Extra.IMAGE_POSITION, position);
+		startActivity(intent);
+	}
+	
+	private void startSearchActivity() {
+		Intent intent = new Intent(this, SearchActivity.class);
 		startActivity(intent);
 	}
 
@@ -329,11 +366,20 @@ public class ImageListActivity extends ListViewBaseActivity{
 				for (int i = 0; i < s.size(); i++){
 			    	ImageView iView = new ImageView(ImageListActivity.this);
 					imageLoader.displayImage(s.get(i), iView, g_options);
-					LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(180, 180);
-					lp.leftMargin = 6;
-					lp.rightMargin = 6;
+					int pxW = DensityUtil.dip2px(ImageListActivity.this, 100);
+					int pxH = DensityUtil.dip2px(ImageListActivity.this, 100);
+					LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(pxW, pxH);
+					lp.leftMargin = DensityUtil.dip2px(ImageListActivity.this, 6);
+					lp.rightMargin = DensityUtil.dip2px(ImageListActivity.this, 6);
 					iView.setId(i);//设置这个View 的id 
+					iView.setTag(now.getImagesHD());
 					iView.setLayoutParams(lp);
+					iView.setOnClickListener(new OnClickListener(){
+						@Override
+						public void onClick(View v) {
+							// TODO Auto-generated method stub
+							startImagePagerActivity(v.getId(), (List<String>)v.getTag());
+						}});
 					holder.ad.image_scroll.addView(iView);
 				}
 			}else{
@@ -422,6 +468,52 @@ public class ImageListActivity extends ListViewBaseActivity{
 				geneItems(LOAD);
 			}
 		}, delay_time);
+	}
+	
+	public boolean onTouch(MotionEvent ev){
+		boolean isFinished = false;
+		if (mLastY == -1) {
+			mLastY = ev.getY();
+		}
+
+		switch (ev.getAction()) {
+		case MotionEvent.ACTION_DOWN:
+			mLastY = ev.getY();
+			break;
+		case MotionEvent.ACTION_MOVE:
+			final float deltaY = ev.getY() - mLastY;
+			final int h = tags.getHeight();
+			if (deltaY > 0 && mLayoutParams.bottomMargin < mBottomMargin){
+					isFinished = true;
+					showTags = 1;
+					mLayoutParams.bottomMargin += deltaY;
+					if (mLayoutParams.bottomMargin > mBottomMargin){
+						mLayoutParams.bottomMargin = mBottomMargin;
+					}
+					tags.getParent().requestLayout();
+					break;
+			}
+			if (deltaY < 0 && (mBottomMargin - mLayoutParams.bottomMargin < h)){
+					isFinished = true;
+					showTags = 0;
+					mLayoutParams.bottomMargin += deltaY;
+					if (mBottomMargin - mLayoutParams.bottomMargin >= tags.getHeight()){
+						mLayoutParams.bottomMargin = mBottomMargin - tags.getHeight(); 
+					}
+					tags.getParent().requestLayout();
+					break;
+			}
+			mLastY = ev.getY();
+			break;
+		case MotionEvent.ACTION_UP: 
+			mLastY = -1; // reset
+			popWindowDo();
+			break;
+		}
+		if (showTags != -1){
+			isFinished = true;
+		}
+		return isFinished;
 	}
 
 	private class DownTagTask extends AsyncTask<String,String,List<TagItem>>

@@ -38,7 +38,9 @@
         <activity
             android:name=".ImageGalleryActivity"
             android:label="@string/ac_name_image_gallery" />
-
+		<activity
+            android:name=".SearchActivity"
+            android:label="@string/ac_name_image_search" />
         <!-- Widget -->
         <receiver android:name=".widget.UILWidgetProvider" >
             <meta-data
