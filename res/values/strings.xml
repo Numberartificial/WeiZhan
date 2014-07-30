@@ -32,5 +32,9 @@
     <string name="xlistview_header_last_time">上次刷新时间：</string>
     <string name="xlistview_footer_hint_normal">查看更多</string>
     <string name="xlistview_footer_hint_ready">松开载入更多</string>
+    
+    <string name="bt_share">分享</string>
+    <string name="bt_collect">收藏</string>
+    <string name="bt_blow">吹一下</string>
 
 </resources>

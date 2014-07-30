@@ -15,6 +15,7 @@
  *******************************************************************************/
 package com.nostra13.example.universalimageloader;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -30,7 +31,9 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Animation;
+import android.view.animation.ScaleAnimation;
 import android.view.animation.Transformation;
 import android.view.animation.TranslateAnimation;
 import android.widget.*;
@@ -41,7 +44,6 @@ import com.custom.vg.list.CustomListView;
 import com.custom.vg.list.OnItemClickListenerTag;
 import com.custom.vg.list.OnItemLongClickListenerTag;
 import com.example.dsfwe.AdItem;
-import com.example.dsfwe.BlowItem;
 import com.example.dsfwe.NetworkJson;
 import com.example.dsfwe.TagAdapter;
 import com.example.dsfwe.TagItem;
@@ -51,7 +53,6 @@ import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer;
 import com.nostra13.universalimageloader.core.display.RoundedBitmapDisplayer;
-import com.util.CustomGallery;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -59,7 +60,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-import me.maxwin.view.Info;
 import me.maxwin.view.XListView;
 import me.maxwin.view.XListView.IXListViewListener;
 
@@ -72,25 +72,20 @@ public class ImageListActivity extends ListViewBaseActivity{
 
 	private  final static int REFRESH =1;
 	private  final static int LOAD =2;
-	private final static int blow_times = 1;
-	private  int blow = 0;
-	private BlowItem blowItem; 
-	private AdItem blowAdItem;
-	
-	private String blowAdId;//标识哪个ad被吹上去l
-	
 	private InfoAdapter mAdapter;
 	private List<AdItem> adlist; 
-
 	
 	private static int delay_time = 0;
 	private Handler mHandler;
+	
+	LinearLayout searchView;
 	
 	private LinearLayout tags;
 	private CustomListView tagview;
 	private List<TagItem> taglist = null;
 	private TagAdapter adapter;
 	private String wzName;
+	private boolean showTags = true;
 	
 	private Animation mDownA;
 	private Animation mUpA;
@@ -152,14 +147,13 @@ public class ImageListActivity extends ListViewBaseActivity{
 		TextView text = (TextView)mRe.findViewById(R.id.list_text_title_name);
 		text.setText("微站名");
 	
+		searchView = (LinearLayout)findViewById(R.id.list_view_search);
 		tags = (LinearLayout)findViewById(R.id.list_tags);
 		tags.setVisibility(View.VISIBLE);
 		tagview = (CustomListView)tags.findViewById(R.id.list_sexangleView);	
 		initTag();
 	
 		adlist = new ArrayList<AdItem>();
-		blowItem = new BlowItem();
-
 		listView = (XListView) findViewById(R.id.xListView);
 		listView.setClickable(true);
 		listView.setPullLoadEnable(true);
@@ -192,54 +186,48 @@ public class ImageListActivity extends ListViewBaseActivity{
 		//只显示一行tag数据。
 		flag = TAG_LOAD_MORE;	
 	}
-	
-	public class MyAnimation extends TranslateAnimation {
-
-        private View mView;
+	public class MyAnimation extends Animation {
+        private int y;
+        private int lastAdd;
 
         private LinearLayout.LayoutParams mLayoutParams;
-
-        private int mMarginTopFromY, mMarginTopToY;
-
-        public MyAnimation(float fromX, float toX, float fromY, float toY, View view) {
-            super(fromX, toX, fromY, toY);
-            mView = view;
-            mLayoutParams = (LinearLayout.LayoutParams) view.getLayoutParams();
-            int height = mView.getHeight();
-            mMarginTopFromY = (int) (height *(fromY - 1)) + mLayoutParams.topMargin;
-            mMarginTopToY = (int) (height * (toY - 1)) + mLayoutParams.topMargin;
+        
+        public MyAnimation(int toY) {
+            y = toY;
+            lastAdd = 0;
         }
 
-        @Override
-        protected void applyTransformation(float interpolatedTime, Transformation t) {
-            super.applyTransformation(interpolatedTime, t);
+        @SuppressLint("NewApi") @Override
+        protected void applyTransformation(float interpolatedTime, Transformation tran) {
             if (interpolatedTime < 1.0f) {
-                int newMarginTop = mMarginTopFromY
-                        + (int) ((mMarginTopToY - mMarginTopFromY) * interpolatedTime);
-                mLayoutParams.setMargins(mLayoutParams.leftMargin, newMarginTop,
-                    mLayoutParams.rightMargin, mLayoutParams.bottomMargin);
-                mView.getParent().requestLayout();
+
+                int now = (int)(interpolatedTime * y);
+            	mLayoutParams = (LinearLayout.LayoutParams) tags.getLayoutParams();
+            	mLayoutParams.setMargins(mLayoutParams.leftMargin, mLayoutParams.topMargin,
+                        mLayoutParams.rightMargin, mLayoutParams.bottomMargin + (now - lastAdd));
+                lastAdd = now;
+            	tags.getParent().requestLayout();
             } else {
+
             }
         }
 	}
 	public void popWindowDo(){
-		float height = tags.getHeight();
-		if (View.VISIBLE != tags.getVisibility()){
-            mDownA = new MyAnimation(0.0f, 0.0f, 1.0f, 2.0f, tags);
+		int offset = 5;
+		int height = tags.getHeight() + offset;
+		if (!showTags){
+    		//tagview.setVisibility(View.VISIBLE);
+            mDownA = new MyAnimation(height); 
             mDownA.setDuration(300);
-           // mDownA.setFillAfter(true);
-            tags.startAnimation(mDownA);
-			tags.setVisibility(View.VISIBLE);
+            searchView.startAnimation(mDownA);
+            showTags = true;
 		}
-		else
-			if (View.VISIBLE == tags.getVisibility()){
-                mUpA = new MyAnimation(0.0f, 0.0f, 1.0f, 0.0f, tags);
+		else{
+                mUpA = new MyAnimation(-height); 
                 mUpA.setDuration(300);
-              //  mUpA.setFillAfter(true);
-                tags.startAnimation(mUpA);
-				tags.setVisibility(View.INVISIBLE);
-			}
+                searchView.startAnimation(mUpA);
+                showTags = false;
+		}
 	}
 	
 	@Override
@@ -277,50 +265,14 @@ public class ImageListActivity extends ListViewBaseActivity{
 			TextView content;
 			Button voice;
 			TextView voice_play;
-			CustomGallery images;
+			LinearLayout image_scroll;
 		}
 		private class Buttons{
-			Button bt_share;
-			Button bt_collect;
-			Button bt_blow;
+			RelativeLayout bt_share;
+			RelativeLayout bt_collect;
+			RelativeLayout bt_blow;
 		}
 	}
-	
-	
-	
-	
-	private class CustomGalleryAdapter extends BaseAdapter {
-		List<String> urls;
-		CustomGalleryAdapter(List<String> urls){
-			this.urls = urls;
-		}
-		@Override
-		public int getCount() {
-			return urls.size();
-		}
-
-		@Override
-		public String getItem(int position) {
-			return this.urls.get(position);
-		}
-
-		@Override
-		public long getItemId(int position) {
-			return position;
-		}
-
-		@Override
-		public View getView(int position, View convertView, ViewGroup parent) {
-			ImageView imageView = (ImageView) convertView;
-			if (imageView == null) {
-				imageView = (ImageView) getLayoutInflater().inflate(R.layout.item_gallery_image, parent, false);
-			}
-			imageLoader.displayImage(getItem(position), imageView, g_options);
-			return imageView;
-		}
-	}
-	
-	
 	
 	private class InfoAdapter extends BaseAdapter{
 		private List<AdItem> list;
@@ -339,7 +291,6 @@ public class ImageListActivity extends ListViewBaseActivity{
 		public View getView(int position, View convertView, ViewGroup parent){
 			View view = convertView;
 			final ViewHolder holder;
-			final int pos = position;
 			if (convertView == null) {
 				view = inflater.inflate(R.layout.item_list_image, parent, false);
 				holder = new ViewHolder();
@@ -352,11 +303,10 @@ public class ImageListActivity extends ListViewBaseActivity{
 				holder.ad.content = (TextView)view.findViewById(R.id.list_item_text_content);
 				holder.ad.voice = (Button)view.findViewById(R.id.list_item_bt_voice);
 				holder.ad.voice_play = (TextView)view.findViewById(R.id.list_item_text_voice);
-				
-				holder.ad.images = (CustomGallery)view.findViewById(R.id.list_item_gallery_images);
-				holder.buttons.bt_share = (Button)view.findViewById(R.id.list_item_bt_share);
-				holder.buttons.bt_collect = (Button)view.findViewById(R.id.list_item_bt_collect);
-				holder.buttons.bt_blow = (Button)view.findViewById(R.id.list_item_bt_blow);
+				holder.ad.image_scroll = (LinearLayout)view.findViewById(R.id.image_scroll_add);
+				holder.buttons.bt_share = (RelativeLayout)view.findViewById(R.id.list_item_bt_share);
+				holder.buttons.bt_collect = (RelativeLayout)view.findViewById(R.id.list_item_bt_collect);
+				holder.buttons.bt_blow = (RelativeLayout)view.findViewById(R.id.list_item_bt_blow);
 				view.setTag(holder);
 			} else {
 				holder = (ViewHolder) view.getTag();
@@ -364,44 +314,40 @@ public class ImageListActivity extends ListViewBaseActivity{
 
 			AdItem now = getItem(position);
 			imageLoader.displayImage(now.getUserImage(), holder.userinfo.head, options, animateFirstListener);
-			
 			holder.userinfo.username.setText(now.getUserName());
 			holder.ad.price.setText("" + now.getPrice());
 			holder.ad.title.setText(now.getTitle());
 			holder.ad.content.setText(now.getContent());
 			holder.ad.voice.setFocusable(false);
 			holder.ad.voice_play.setText("23\"");
-			holder.ad.images.setFocusable(false);
-			
-			List<String> urls = new ArrayList<String>();
+			//很重要
+			holder.ad.image_scroll.removeAllViews();
+			//List<String> urls = new ArrayList<String>();
 			List<String> s = now.getImages();
 			if (null != s)
 			{
-				for (String str : s){
-					urls.add(str);
+				for (int i = 0; i < s.size(); i++){
+			    	ImageView iView = new ImageView(ImageListActivity.this);
+					imageLoader.displayImage(s.get(i), iView, g_options);
+					LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(180, 180);
+					lp.leftMargin = 6;
+					lp.rightMargin = 6;
+					iView.setId(i);//设置这个View 的id 
+					iView.setLayoutParams(lp);
+					holder.ad.image_scroll.addView(iView);
 				}
+			}else{
 			}
-			//为Gallery 设置图片数组。
-			holder.ad.images.setAdapter(new CustomGalleryAdapter(urls){});
-			
-			//holder.buttons.bt_share.setText("分享");
-			//holder.buttons.bt_collect.setText("收藏");
-			//holder.buttons.bt_blow.setText("吹上去");
 			//listView 中有button控件时，必须将子控件的focusable设置为false,其本身才能捕获到click
+			holder.buttons.bt_share.setClickable(true);
 			holder.buttons.bt_blow.setFocusable(false);
 			holder.buttons.bt_blow.setClickable(true);
-			
 			holder.buttons.bt_blow.setOnClickListener(new OnClickListener(){
+
 				@Override
 				public void onClick(View v) {
 					// TODO Auto-generated method stub
-					//popWindowDo();
-					blowAdId = getItem(pos).getId();
-					blowAdId = blowAdId.substring(1,blowAdId.length());
-					blowAdItem = getItem(pos);
-					//吹上去
-					onBlowUp();
-				
+					popWindowDo();
 				}});
 			return view;
 		}
@@ -441,10 +387,6 @@ public class ImageListActivity extends ListViewBaseActivity{
 		}
 	}
 	
-	
-	
-	
-	
 	private void geneItems(int doWhat) {
 		int num = 10;
 		DownAdTask task;
@@ -455,7 +397,6 @@ public class ImageListActivity extends ListViewBaseActivity{
 			int size = adlist.size();
 			task = new DownAdTask(activity,size,size + num - 1,null, doWhat);
 		}
-	
 		task.execute(wzName);
 	}
 
@@ -482,58 +423,26 @@ public class ImageListActivity extends ListViewBaseActivity{
 			}
 		}, delay_time);
 	}
-	
-	public void onBlowUp()
-	{
-		//通知服务器改变顺序，接收了则改变本地的顺序，否则，不改变。
-		
-		DownBlowFlagTask task = new DownBlowFlagTask(this);
-		task.execute(wzName);
 
-	}
-	
-	public void executeBlowUp()
-	{
-		if(blowItem != null && blowItem.getFlag())//通知服务器改变顺序。成功的话，刷新页面。
-		{	
-			if(blow < blow_times)
-			{	
-				blow++;
-				adlist.remove(blowAdItem);
-				adlist.add(0,blowAdItem);
-				mAdapter.notifyDataSetChanged();
-			
-				Toast.makeText(activity, "吹上去了", Toast.LENGTH_SHORT).show();
-			}
-			else
-			{
-				Toast.makeText(activity, "吹不动了,快去交朋友下载app来吹吧", Toast.LENGTH_SHORT).show();
-			}
-		}
-		else		
-		{
-			Toast.makeText(activity, "吹失败啦,检查一下您的网络吧", Toast.LENGTH_SHORT).show();
-		}
-	}
-	
-	private class DownBlowFlagTask extends AsyncTask<String,String,BlowItem>
+	private class DownTagTask extends AsyncTask<String,String,List<TagItem>>
 	{
 		 Context ctx;
-		public DownBlowFlagTask(Context ctx)
+		public DownTagTask(Context ctx)
 		{
 			this.ctx = ctx;
 		}
 
 		@Override
-		protected BlowItem doInBackground(String... arg0) {
+		protected List<TagItem> doInBackground(String... arg0) {
 			try{
 					if(wzName == "")
 					{
 						return null;
 					}
 					else
-					{	blowItem = NetworkJson.getWeiZhanBlowFlag(ctx, wzName, blowAdId).getResult();
-						return blowItem;
+					{	
+						taglist = NetworkJson.getWeiZhanTagList(ctx, wzName).getResult();	
+						return taglist;
 					}
 			}catch(Exception e){
 					
@@ -543,14 +452,19 @@ public class ImageListActivity extends ListViewBaseActivity{
 		}
 		
 		  @Override  
-	      protected void onPostExecute(BlowItem result) {  
-			  	if(blowItem ==null ) blowItem = new BlowItem();
-			  	blowItem = 	result;
-			   	executeBlowUp();
+	      protected void onPostExecute(List<TagItem> result) {  	
+			  if(taglist ==null ) taglist = new ArrayList<TagItem>();
+			  if(result != null)
+			    {	
+			    	 taglist = result;
+			    }
+			    else
+			    {
+			    	 	taglist.set(0, new TagItem("您还没有自己的标签，快去创建吧."));
+			    }
+			    ShowTagListView();
 	       }  
 	}
-
-	
 	private void initTag()
 	{
 		ApiConfiguration.config("www.zhaoyiru.baixing.cn", null, "api_androidbaixing",
@@ -630,47 +544,7 @@ public class ImageListActivity extends ListViewBaseActivity{
 				}
 			}});
 	}
-	private class DownTagTask extends AsyncTask<String,String,List<TagItem>>
-	{
-		 Context ctx;
-		public DownTagTask(Context ctx)
-		{
-			this.ctx = ctx;
-		}
-
-		@Override
-		protected List<TagItem> doInBackground(String... arg0) {
-			try{
-					if(wzName == "")
-					{
-						return null;
-					}
-					else
-					{	
-						taglist = NetworkJson.getWeiZhanTagList(ctx, wzName).getResult();	
-						return taglist;
-					}
-			}catch(Exception e){
-					
-				e.printStackTrace();
-			}
-			return null;
-		}
-		
-		  @Override  
-	      protected void onPostExecute(List<TagItem> result) {  	
-			  if(taglist ==null ) taglist = new ArrayList<TagItem>();
-			  if(result != null)
-			    {	
-			    	 taglist = result;
-			    }
-			    else
-			    {
-			    	 	taglist.set(0, new TagItem("您还没有自己的标签，快去创建吧."));
-			    }
-			    ShowTagListView();
-	       }  
-	}
+	
 	private class DownAdTask extends AsyncTask<String,String,List<AdItem>>
 	{
 		 Context ctx;
@@ -685,7 +559,6 @@ public class ImageListActivity extends ListViewBaseActivity{
 			this.params = params;
 			this.doWhat = doWhat;
 		}
-
 		@Override
 		protected List<AdItem> doInBackground(String... arg0) {
 			try{
@@ -695,8 +568,7 @@ public class ImageListActivity extends ListViewBaseActivity{
 				}
 				else
 				{	
-						return NetworkJson.getWeiZhanAdList(ctx, wzName, from, to, params).getResult();	
-				
+					return NetworkJson.getWeiZhanAdList(ctx, wzName, from, to, params).getResult();	
 				}
 			}catch(Exception e){
 				e.printStackTrace();

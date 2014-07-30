@@ -1,31 +1,117 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="fill_parent"
-        android:layout_height="58dp"
+        android:layout_height="42dp"
         android:layout_marginTop="20dp"
+        android:baselineAligned="false"
         android:orientation="horizontal">
-    	    <Button
-	        android:id="@+id/list_item_bt_share"
+        <RelativeLayout  
+            android:id="@+id/list_item_bt_share"
 	        android:layout_width="0dp"
 	        android:layout_height="match_parent"
 	        android:layout_weight="1"
-	        android:background="@drawable/btn_share" 
-	        android:focusable="false" />
+	        android:background="@drawable/bt_bg" 
+	        android:focusable="false" >
+	        
+              	 <View 
+                   	 android:id="@+id/strut"
+       				 android:layout_width="0dp"
+        			 android:layout_height="0dp" 
+      				 android:layout_centerHorizontal="true"/>
+                 <ImageView
+                     android:id="@+id/list_item_image_share"
+               		 android:background="@drawable/bt_share"
+			        android:layout_width="22dp"
+			        android:layout_height="15dp"
+			        android:layout_centerVertical="true"
+			        android:layout_toLeftOf="@id/strut" 
+			        android:layout_marginRight="12dp"
+			        android:contentDescription="@string/descr_image"
+			        android:scaleType="centerCrop" />
+                 
+        <TextView
+            android:id="@+id/list_item_text_share"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/list_item_image_share"
+            android:layout_centerVertical="true"
+            android:layout_alignLeft="@id/strut"
+            android:paddingRight="2dp"
+            android:textSize="12sp"
+            android:text="@string/bt_share"
+            android:textColor="#666666" />
+        </RelativeLayout>
 
-    	    <Button
-    	        android:id="@+id/list_item_bt_collect"
-    	        android:layout_width="0dp"
-    	        android:layout_height="match_parent"
-	        	android:layout_weight="1"
-    	        android:background="@drawable/btn_fav"
-    	        android:focusable="false" />
-	
-			<Button
-	        android:id="@+id/list_item_bt_blow"
+        <RelativeLayout  
+            android:id="@+id/list_item_bt_collect"
 	        android:layout_width="0dp"
 	        android:layout_height="match_parent"
 	        android:layout_weight="1"
-	        android:background="@drawable/btn_blow"  
-	        android:focusable="false" />
+	        android:background="@drawable/bt_bg"  
+	        android:focusable="false" >
+                     <View 
+                   	 android:id="@+id/strut1"
+       				 android:layout_width="0dp"
+        			 android:layout_height="0dp" 
+      				 android:layout_centerHorizontal="true"/>
+                 <ImageView
+                    android:id="@+id/list_item_image_collect"
+             		android:background="@drawable/bt_collect"
+			        android:layout_width="22dp"
+			        android:layout_height="15dp"
+			        android:layout_centerVertical="true"
+			        android:layout_toLeftOf="@id/strut1" 
+			        android:layout_marginRight="12dp"
+			        android:contentDescription="@string/descr_image"
+			        android:scaleType="centerCrop" />
+		                 
+		        <TextView
+		            android:id="@+id/list_item_text_collect"
+		            android:layout_width="wrap_content"
+		            android:layout_height="wrap_content"
+		            android:layout_toRightOf="@id/list_item_image_collect"
+		             android:layout_centerVertical="true"
+            		android:layout_alignLeft="@id/strut1"
+            		android:paddingRight="2dp"
+		            android:textSize="12sp"
+		            android:text="@string/bt_collect"
+		            android:textColor="#666666" />
+        </RelativeLayout>
+        
+        <RelativeLayout  
+            android:id="@+id/list_item_bt_blow"
+	        android:layout_width="0dp"
+	        android:layout_height="match_parent"
+	        android:layout_weight="1"
+	        android:background="@drawable/bt_bg"  
+	        android:focusable="false" >
+		             <View 
+                   	 android:id="@+id/strut2"
+       				 android:layout_width="0dp"
+        			 android:layout_height="0dp" 
+      				 android:layout_centerHorizontal="true"/>
+                 <ImageView
+                     android:id="@+id/list_item_image_blow"
+               		 android:background="@drawable/bt_blow"
+			        android:layout_width="22dp"
+			        android:layout_height="15dp"
+			        android:layout_centerVertical="true"
+			        android:layout_toLeftOf="@id/strut2" 
+			        android:layout_marginRight="12dp"
+			        android:contentDescription="@string/descr_image"
+			        android:scaleType="centerCrop" />
+                 
+        <TextView
+            android:id="@+id/list_item_text_blow"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/list_item_image_blow"
+            android:layout_centerVertical="true"
+            android:layout_alignLeft="@id/strut2"
+            android:paddingRight="2dp"
+            android:textSize="12sp"
+            android:text="@string/bt_blow"
+            android:textColor="#666666" />
+        </RelativeLayout>
         
     </LinearLayout>
