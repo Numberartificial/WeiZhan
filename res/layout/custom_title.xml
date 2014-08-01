@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RelativeLayout    xmlns:android="http://schemas.android.com/apk/res/android"
+	    android:id="@+id/search_title"
+	    android:layout_width="fill_parent"     
+	    android:layout_height="52dp"
+	    android:background="@drawable/bg_title">  
+	
+		<RelativeLayout  
+	        android:layout_width="60dp"
+	        android:layout_height="match_parent"
+	        android:id="@+id/btn_back"
+	        android:background="@drawable/bt_bg" 
+	        android:focusable="false" >
+	        
+              	 <View 
+                   	 android:id="@+id/strut"
+       				 android:layout_width="0dp"
+        			 android:layout_height="0dp" 
+      				 android:layout_centerHorizontal="true"/>
+                 <ImageView
+                     android:id="@+id/search_item_image"
+               		 android:background="@drawable/bt_collect"
+			        android:layout_width="22dp"
+			        android:layout_height="15dp"
+			        android:layout_centerVertical="true"
+			        android:layout_toLeftOf="@id/strut" 
+			        android:layout_marginRight="12dp"
+			        android:contentDescription="@string/descr_image"
+			        android:scaleType="centerCrop" />
+                 
+		        <TextView
+		            android:id="@+id/search_item_text"
+		            android:layout_width="wrap_content"
+		            android:layout_height="wrap_content"
+		            android:layout_toRightOf="@id/search_item_image"
+		            android:layout_centerVertical="true"
+		            android:layout_alignLeft="@id/strut"
+		            android:paddingRight="2dp"
+		            android:textSize="14sp"
+		            android:text="@string/search_back"
+		            android:textColor="#81d647" />
+        </RelativeLayout>
+
+	    <TextView
+	        android:id="@+id/search_text_title_name"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:paddingRight="5dp"
+	        android:layout_centerHorizontal="true"
+	        android:layout_centerVertical="true"
+	        android:text="@string/search_title"
+            android:textSize="16sp"
+            android:textColor="#81d647" />
+
+	</RelativeLayout>

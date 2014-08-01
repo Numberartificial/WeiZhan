@@ -5,6 +5,7 @@ import com.util.DensityUtil;
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Window;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -15,8 +16,10 @@ public class SearchActivity extends Activity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.ac_search);
 
+		//隐藏标题栏
+		this.requestWindowFeature(Window.FEATURE_NO_TITLE);
+		setContentView(R.layout.ac_search);
 		//Bundle bundle = getIntent().getExtras();
 		//imageUrls = bundle.getStringArray(Extra.IMAGES);
 

@@ -161,6 +161,7 @@ public class ImageListActivity extends ListViewBaseActivity{
 		
 		adlist = new ArrayList<AdItem>();
 		listView = (XListView) findViewById(R.id.xListView);
+		listView.setFastScrollEnabled(true);  
 		listView.setClickable(true);
 		listView.setPullLoadEnable(true);
 		mAdapter = new InfoAdapter(ImageListActivity.this, adlist);
@@ -572,21 +573,25 @@ public class ImageListActivity extends ListViewBaseActivity{
 	}
 	
 	public void onRefresh() {
-		mHandler.postDelayed(new Runnable() {
+		geneItems(REFRESH);
+		/*mHandler.postDelayed(new Runnable() {
 			@Override
 			public void run() {
 				geneItems(REFRESH);
 			}
-		}, delay_time);
+		}, delay_time);*/
 	}
 
 	public void onLoadMore() {
+
+		geneItems(LOAD);
+		/*
 		mHandler.postDelayed(new Runnable() {
 			@Override
 			public void run() {
 				geneItems(LOAD);
 			}
-		}, delay_time);
+		}, delay_time);*/
 	}
 	
 	public boolean onTouch(MotionEvent ev){
@@ -822,6 +827,5 @@ public class ImageListActivity extends ListViewBaseActivity{
 			     onLoad();
 	        }  
 		}
-	
 
 }
