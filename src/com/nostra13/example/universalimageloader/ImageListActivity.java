@@ -29,9 +29,11 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
+import android.view.WindowManager;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -73,31 +75,41 @@ public class ImageListActivity extends ListViewBaseActivity{
 	DisplayImageOptions options;
 	DisplayImageOptions g_options;
 	String[] imageUrls;
+	
+	private int TITLE_HEIGHT = 52;
 
 	private  final static int REFRESH =1;
 	private  final static int LOAD =2;
 	private InfoAdapter mAdapter;
 	private List<AdItem> adlist; 
+	private RelativeLayout mainView;
+	private LinearLayout mContentView;
+	private LinearLayout mTitleView;
 	
 	private static int delay_time = 0;
 	private Handler mHandler;
 	
-	LinearLayout searchView;
+	LinearLayout coverView;
 	
-	private LinearLayout.LayoutParams mLayoutParams;
-	private int mBottomMargin;
+	private RelativeLayout.LayoutParams mLayoutParams;
+	private int mMargin;
 	private LinearLayout tags;
 	private CustomListView tagview;
 	private List<TagItem> taglist = null;
 	private TagAdapter adapter;
 	private String wzName;
 	private int showTags = -1;
+	private int tagShow = 1;
 	
 	private Animation mDownA;
 	private Animation mUpA;
+	private RelativeLayout ani_handle;
 	private RelativeLayout mRe;
 	
 	private float mLastY = -1;
+	private int ani_images[];
+	private float ani_time = 0.25f;
+	private boolean ani_show = false;
 	
 	//tag
 	private int flag;
@@ -142,41 +154,10 @@ public class ImageListActivity extends ListViewBaseActivity{
 		.displayer(new RoundedBitmapDisplayer(10))
 		.build();
 	
-		mRe = (RelativeLayout)findViewById(R.id.list_title);
-		Button bt = (Button)mRe.findViewById(R.id.list_bt_notify);
-		bt.setOnClickListener(new OnClickListener(){
-
-			@Override
-			public void onClick(View v) {
-				// TODO Auto-generated method stub
-				popWindowDo();
-			}});
-		bt = (Button)mRe.findViewById(R.id.list_bt_name);
-		bt.setOnClickListener(new OnClickListener(){
-
-			@Override
-			public void onClick(View v) {
-				// TODO Auto-generated method stub
-				startSearchActivity();
-			}});
-		TextView text = (TextView)mRe.findViewById(R.id.list_text_title_name);
-		text.setText("微站名");
-		text.setClickable(true);
-		text.setOnClickListener(new OnClickListener(){
-
-			@Override
-			public void onClick(View v) {
-				// TODO Auto-generated method stub
-				startSearchActivity();
-			}});
-		searchView = (LinearLayout)findViewById(R.id.list_view_search);
 		tags = (LinearLayout)findViewById(R.id.list_tags);
 		tags.setVisibility(View.VISIBLE);
 		tagview = (CustomListView)tags.findViewById(R.id.list_sexangleView);	
 		initTag();
-		mLayoutParams = (LinearLayout.LayoutParams) tags.getLayoutParams();
-		// 记录下正常显示时tagsView的BottomMargin
-		mBottomMargin = mLayoutParams.bottomMargin;
 		
 		adlist = new ArrayList<AdItem>();
 		listView = (XListView) findViewById(R.id.xListView);
@@ -214,27 +195,163 @@ public class ImageListActivity extends ListViewBaseActivity{
 		});*/
 		//只显示一行tag数据。
 		flag = TAG_LOAD_MORE;	
+		
+		WindowManager wm = (WindowManager) this.getSystemService(Context.WINDOW_SERVICE);
+		mainView = (RelativeLayout) this.findViewById(R.id.list_main);
+		mContentView = (LinearLayout)mainView.findViewById(R.id.list_content);
+		mTitleView = (LinearLayout)LayoutInflater.from(this).inflate(R.layout.ac_image_list_title, null);
+		RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT,LayoutParams.WRAP_CONTENT);
+		//lp.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+		lp.topMargin = 0;
+		//lp.addRule(RelativeLayout.ABOVE, R.id.list_content);
+		/*int h = content.getHeight() + now.getHeight() - wm.getDefaultDisplay().getHeight();
+		lp.bottomMargin += h;*/
+		RelativeLayout.LayoutParams lp1 = (RelativeLayout.LayoutParams)mContentView.getLayoutParams();
+		//lp1.addRule(RelativeLayout.BELOW, R.id.list_view_title);
+		mTitleView.setLayoutParams(lp);
+		mRe = (RelativeLayout)mTitleView.findViewById(R.id.list_title);
+		Button bt = (Button)mRe.findViewById(R.id.list_bt_notify);
+		bt.setOnClickListener(new OnClickListener(){
+
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				popWindowDo();
+			}});
+		bt = (Button)mRe.findViewById(R.id.list_bt_name);
+		bt.setOnClickListener(new OnClickListener(){
+
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				startSearchActivity();
+			}});
+		TextView text = (TextView)mRe.findViewById(R.id.list_text_title_name);
+		text.setText("微站名");
+		text.setClickable(true);
+		text.setOnClickListener(new OnClickListener(){
+
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				startSearchActivity();
+			}});
+		coverView = (LinearLayout)findViewById(R.id.ac_image_cover);
+		
+		//添加handle
+		ani_handle = new RelativeLayout(this);
+		RelativeLayout.LayoutParams rl = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
+		rl.topMargin = DensityUtil.dip2px(this, 52);;
+		rl.leftMargin = DensityUtil.dip2px(this, 200);
+		ani_handle.setLayoutParams(rl);
+		ani_handle.setBackgroundResource(R.drawable.btn_handler);
+		ani_handle.setClickable(true);
+		ani_handle.setFocusable(false);
+		ani_images = new int[2];
+		ani_images[1] = R.drawable.btn_handler_on1;
+		ani_images[0] = R.drawable.btn_handler_on0;
+		ani_handle.setOnTouchListener(new OnTouchListener(){     
+		     
+			   int lastX,lastY;  
+			           
+			         @Override  
+			   public boolean onTouch(View v, MotionEvent event) {  
+			    // TODO Auto-generated method stub  
+			          int ea=event.getAction();  
+			            
+			          switch(ea){  
+			          case MotionEvent.ACTION_DOWN:             
+			             
+			           lastX=(int)event.getRawX();//获取触摸事件触摸位置的原始X坐标  
+			           lastY=(int)event.getRawY();             
+			           break;  
+			           
+			          case MotionEvent.ACTION_MOVE:  
+			           int dx=(int)event.getRawX()-lastX;  
+			           int dy=(int)event.getRawY()-lastY;             
+
+			           RelativeLayout.LayoutParams rl = (RelativeLayout.LayoutParams)v.getLayoutParams();
+			           rl.leftMargin += dx;    
+			           rl.topMargin += dy;
+			           mainView.requestLayout();
+			           lastX=(int)event.getRawX();  
+			           lastY=(int)event.getRawY();  
+			           break;  
+			          case MotionEvent.ACTION_UP:  
+			           break;            
+			          }  
+			    return false;  
+			   }});  
+		ani_handle.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				if (tagShow == 0 && showTags == -1){
+					showTags = 1;
+					v.setBackgroundResource(ani_images[1]);
+					ani_show = true;
+					popWindowDo();
+					return;
+				}
+				if (tagShow == 1 && showTags == -1){
+					showTags = 0;
+					v.setBackgroundResource(ani_images[0]);
+					ani_show = true;
+					popWindowDo();
+					return;
+				}
+			}
+		});
+		mainView.addView(ani_handle);
+		mainView.addView(mTitleView);
+		
+		lp1.topMargin=DensityUtil.dip2px(this, 52);
+		mLayoutParams = (RelativeLayout.LayoutParams) mContentView.getLayoutParams();
+		// 记录下正常显示时tagsView的BottomMargin
+		mMargin = lp1.topMargin;
 	}
 	public class MyAnimation extends Animation {
         private int y;
         private int lastAdd;
+        private int show;
+        private int next;
+        private float nextT;
         
-        public MyAnimation(int toY) {
+        public MyAnimation(int toY, int show) {
             y = toY;
             lastAdd = 0;
+            this.show = show;
+            next = 1 - show;
+            nextT = ani_time;
         }
 
         @SuppressLint("NewApi") @Override
         protected void applyTransformation(float interpolatedTime, Transformation tran) {
             if (interpolatedTime < 1.0f) {
 
+            	if (ani_show && interpolatedTime > nextT){
+            		ani_handle.setBackgroundResource(ani_images[next]);
+            		next = 1 - next;
+            		nextT += ani_time;
+            	}
                 int now = (int)(interpolatedTime * y);
-            	mLayoutParams.setMargins(mLayoutParams.leftMargin, mLayoutParams.topMargin,
-                        mLayoutParams.rightMargin, mLayoutParams.bottomMargin + (now - lastAdd));
+            	/*mLayoutParams.setMargins(mLayoutParams.leftMargin, mLayoutParams.topMargin,
+                        mLayoutParams.rightMargin, mLayoutParams.bottomMargin + (now - lastAdd));*/
+                mLayoutParams.topMargin += now - lastAdd;
                 lastAdd = now;
-            	tags.getParent().requestLayout();
+            	mainView.requestLayout();
             } else {
+            	if (show == 1){
+                    showTags = -1;
+                    tagShow = 1;
+            	}else{
+                    showTags = -1;
+                    tagShow = 0;
+            	}
 
+            	ani_show = false;
+                ani_handle.setBackgroundResource(R.drawable.btn_handler);
             }
         }
 	}
@@ -244,20 +361,22 @@ public class ImageListActivity extends ListViewBaseActivity{
 		int scale = 2;
 		if (showTags == 1){
     		//tagview.setVisibility(View.VISIBLE);
-			height = mBottomMargin - mLayoutParams.bottomMargin; 
-            mDownA = new MyAnimation(height); 
+			height = mMargin - mLayoutParams.topMargin; 
+            mDownA = new MyAnimation(height, showTags); 
             mDownA.setDuration(height * scale);
-            searchView.startAnimation(mDownA);
+            mainView.startAnimation(mDownA);
             showTags = -1;
+            tagShow = 1;
 		}
 		else
 		if (showTags == 0){
-			    height = mBottomMargin - mLayoutParams.bottomMargin;
-			    height = height - tags.getHeight() - offset;
-                mUpA = new MyAnimation(height); 
+			    height = mMargin - mLayoutParams.topMargin;
+			    height = height - coverView.getHeight() - offset;
+                mUpA = new MyAnimation(height, showTags); 
                 mUpA.setDuration(- height * scale);
-                searchView.startAnimation(mUpA);
+                mainView.startAnimation(mUpA);
                 showTags = -1;
+                tagShow = 0;
 		}
 	}
 	
@@ -482,25 +601,28 @@ public class ImageListActivity extends ListViewBaseActivity{
 			break;
 		case MotionEvent.ACTION_MOVE:
 			final float deltaY = ev.getY() - mLastY;
-			final int h = tags.getHeight();
-			if (deltaY > 0 && mLayoutParams.bottomMargin < mBottomMargin){
+			final int h = coverView.getHeight();
+			if (deltaY > 0 && mLayoutParams.topMargin < mMargin){
+				if (tagShow == 0 && listView.getFirstVisiblePosition() != 0){
+					break;
+				}
 					isFinished = true;
 					showTags = 1;
-					mLayoutParams.bottomMargin += deltaY;
-					if (mLayoutParams.bottomMargin > mBottomMargin){
-						mLayoutParams.bottomMargin = mBottomMargin;
+					mLayoutParams.topMargin += deltaY;
+					if (mLayoutParams.topMargin > mMargin){
+						mLayoutParams.topMargin = mMargin;
 					}
-					tags.getParent().requestLayout();
+					mainView.requestLayout();
 					break;
 			}
-			if (deltaY < 0 && (mBottomMargin - mLayoutParams.bottomMargin < h)){
+			if (deltaY < 0 && (mMargin - mLayoutParams.topMargin < h)){
 					isFinished = true;
 					showTags = 0;
-					mLayoutParams.bottomMargin += deltaY;
-					if (mBottomMargin - mLayoutParams.bottomMargin >= tags.getHeight()){
-						mLayoutParams.bottomMargin = mBottomMargin - tags.getHeight(); 
+					mLayoutParams.topMargin += deltaY;
+					if (mMargin - mLayoutParams.topMargin >= h){
+						mLayoutParams.topMargin = mMargin - h; 
 					}
-					tags.getParent().requestLayout();
+					mainView.requestLayout();
 					break;
 			}
 			mLastY = ev.getY();
@@ -516,6 +638,8 @@ public class ImageListActivity extends ListViewBaseActivity{
 		return isFinished;
 	}
 
+	
+	
 	private class DownTagTask extends AsyncTask<String,String,List<TagItem>>
 	{
 		 Context ctx;

@@ -15,16 +15,22 @@
  *******************************************************************************/
 package com.nostra13.example.universalimageloader;
 
+import java.util.List;
+
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.nostra13.example.universalimageloader.Constants.Extra;
@@ -33,6 +39,7 @@ import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.assist.ImageScaleType;
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer;
+import com.util.DensityUtil;
 
 /**
  * @author Sergey Tarasevich (nostra13[at]gmail[dot]com)
@@ -44,6 +51,11 @@ public class ImagePagerActivity extends BaseActivity {
 	DisplayImageOptions options;
 
 	ViewPager pager;
+	
+	List<View> views;
+	boolean[]	isLoaded;
+	
+	private LayoutInflater inflater;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -73,8 +85,35 @@ public class ImagePagerActivity extends BaseActivity {
 		pager = (ViewPager) findViewById(R.id.pager);
 		pager.setAdapter(new ImagePagerAdapter(imageUrls));
 		pager.setCurrentItem(pagerPosition);
+
+		inflater = getLayoutInflater();
+		//initViews(imageUrls.length);
 	}
 
+	
+	public void initViews(int size){
+		isLoaded = new boolean[size];
+		for(int i = 0; i < size;i++){
+			isLoaded[i] = false;
+		}
+		for(int i = 0; i < size;i++){
+			FrameLayout imageLayout = (FrameLayout)inflater.inflate(R.layout.item_pager_image, null);
+			assert imageLayout != null;
+			ImageView imageView = (ImageView) imageLayout.findViewById(R.id.image);
+			TextView tx = (TextView) imageLayout.findViewById(R.id.page_num);
+	        String s = (i + 1) + "/" + size; 
+			tx.setText(s);
+			tx.setTextSize(14);
+			/*FrameLayout.LayoutParams fp = new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
+			fp.gravity = Gravity.CENTER;
+			fp.bottomMargin = DensityUtil.dip2px(ImagePagerActivity.this, 56);
+			tx.setLayoutParams(fp);
+			imageLayout.addView(tx);*/
+			views.add(imageLayout);
+		}
+		
+	}
+	
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
 		outState.putInt(STATE_POSITION, pager.getCurrentItem());
@@ -83,11 +122,9 @@ public class ImagePagerActivity extends BaseActivity {
 	private class ImagePagerAdapter extends PagerAdapter {
 
 		private String[] images;
-		private LayoutInflater inflater;
 
 		ImagePagerAdapter(String[] images) {
 			this.images = images;
-			inflater = getLayoutInflater();
 		}
 
 		@Override
@@ -102,9 +139,18 @@ public class ImagePagerActivity extends BaseActivity {
 
 		@Override
 		public Object instantiateItem(ViewGroup view, int position) {
-			View imageLayout = inflater.inflate(R.layout.item_pager_image, view, false);
+			FrameLayout imageLayout = (FrameLayout)inflater.inflate(R.layout.item_pager_image, view, false);
 			assert imageLayout != null;
 			ImageView imageView = (ImageView) imageLayout.findViewById(R.id.image);
+			TextView tx = (TextView) imageLayout.findViewById(R.id.page_num);
+	        String s = (position + 1) + "/" +getCount(); 
+			tx.setText(s);
+			tx.setTextSize(14);
+			/*FrameLayout.LayoutParams fp = new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
+			fp.gravity = Gravity.CENTER;
+			fp.bottomMargin = DensityUtil.dip2px(ImagePagerActivity.this, 56);
+			tx.setLayoutParams(fp);
+			imageLayout.addView(tx);*/
 			final ProgressBar spinner = (ProgressBar) imageLayout.findViewById(R.id.loading);
 
 			imageLoader.displayImage(images[position], imageView, options, new SimpleImageLoadingListener() {
