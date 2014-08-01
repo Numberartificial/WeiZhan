@@ -48,13 +48,7 @@ import com.baixing.network.api.ApiConfiguration;
 import com.custom.vg.list.CustomListView;
 import com.custom.vg.list.OnItemClickListenerTag;
 import com.custom.vg.list.OnItemLongClickListenerTag;
-import com.example.dsfwe.AdItem;
-import com.example.dsfwe.BlowItem;
-import com.example.dsfwe.NetworkJson;
-import com.example.dsfwe.TagAdapter;
-import com.example.dsfwe.TagItem;
-import com.example.yuyin.BlowDialog;
-import com.example.yuyin.NetworkState;
+
 import com.nostra13.example.universalimageloader.Constants.Extra;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
@@ -72,6 +66,15 @@ import me.maxwin.view.XListView;
 import me.maxwin.view.XListViewHeader;
 import me.maxwin.view.XListView.IXListViewListener;
 
+import com.example.dsfwe.AdItem;
+import com.example.dsfwe.BlowItem;
+import com.example.dsfwe.NetworkJson;
+import com.example.dsfwe.TagAdapter;
+import com.example.dsfwe.TagItem;
+
+import com.example.yuyin.BlowDialog;
+import com.example.yuyin.NetworkState;
+import com.example.yuyin.Constants;
 
 public class ImageListActivity extends ListViewBaseActivity{
 
@@ -130,6 +133,7 @@ public class ImageListActivity extends ListViewBaseActivity{
 	private String blowAdId = null;
 	private AdItem blowAdItem = null;
 	private int BLOW_FLAG=0;
+	private RelativeLayout blow_adCard;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -251,6 +255,20 @@ public class ImageListActivity extends ListViewBaseActivity{
 			}});
 		coverView = (LinearLayout)findViewById(R.id.ac_image_cover);
 		
+		
+	
+		blow_adCard = new RelativeLayout(this);
+		RelativeLayout.LayoutParams blow_rl = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
+		blow_rl.topMargin = DensityUtil.dip2px(this, 100);;
+		blow_rl.leftMargin = DensityUtil.dip2px(this, 100);
+		
+		blow_adCard.setLayoutParams(blow_rl);
+		blow_adCard.setFocusable(false);
+		blow_adCard.setClickable(false);
+		blow_adCard.setBackgroundResource(R.drawable.btn_handler);
+		
+		mainView.addView(blow_adCard);
+
 		//添加handle
 		ani_handle = new RelativeLayout(this);
 		RelativeLayout.LayoutParams rl = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
@@ -258,8 +276,10 @@ public class ImageListActivity extends ListViewBaseActivity{
 		rl.leftMargin = DensityUtil.dip2px(this, 200);
 		ani_handle.setLayoutParams(rl);
 		ani_handle.setBackgroundResource(R.drawable.btn_handler);
+		
 		ani_handle.setClickable(true);
 		ani_handle.setFocusable(false);
+		
 		ani_images = new int[2];
 		ani_images[1] = R.drawable.btn_handler_on1;
 		ani_images[0] = R.drawable.btn_handler_on0;
@@ -401,18 +421,16 @@ public class ImageListActivity extends ListViewBaseActivity{
 	}
 	@Override
 	public void onActivityResult(int requestCode,int resultCode,Intent intent)
-	{
-		if(requestCode == BLOW_FLAG)
+	{	
+		
+		if(requestCode == Constants.BLOW_REQUEST && resultCode == Constants.BLOW_UP_OK)
 		{
-			//Bundle data = intent.getExtras();
-			//int 
-			int data = intent.getIntExtra("lich", 0);
-			if(data>0)
-			{
-				//Toast.makeText(activity, "您的吹力是：" + data,Toast.LENGTH_SHORT).show();
 				onBlowUp();
-			}
-			
+		}
+		else
+		if(requestCode == Constants.BLOW_REQUEST && resultCode == Constants.BLOW_UP_CANCEL)
+		{
+				
 		}
 		
 		
@@ -548,7 +566,8 @@ public class ImageListActivity extends ListViewBaseActivity{
 					// TODO Auto-generated method stub
 					//popWindowDo();
 					//popWindowDo();
-					blowAdId = getItem(pos).getId();
+				if(network_state_ok)
+				{	blowAdId = getItem(pos).getId();
 					if(blowAdId!=null)
 						blowAdId = blowAdId.substring(1,blowAdId.length());
 					blowAdItem = getItem(pos);
@@ -563,7 +582,12 @@ public class ImageListActivity extends ListViewBaseActivity{
 				  {
 					  executeBlowUp();
 				  }
-				}});
+				}
+				else
+				{
+					Toast.makeText(activity, "网络连接失败", Toast.LENGTH_SHORT).show();
+				}
+		}});
 			return view;
 		}
 

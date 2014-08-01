@@ -21,14 +21,17 @@ import android.widget.TextView;
 
 public class BlowDialog extends Activity{  
     
-  private Button returnButton;  
-  private TextView inputEditor;  
-   private  int ultDb = 0;
+  private Button blowCancelBt;  
+  private TextView blowTips;  
+   private  int transDb = 0;
+   private int ultDb =0 ;
    private   LinearLayout layout;
-   private Button cancelBt;
+   private Button blowEndBt;
   // private Button retryBt;
    private RecordThread rt;
    private  Intent mIntent ;  
+
+
   protected void onCreate(Bundle savedInstanceState) {  
       super.onCreate(savedInstanceState);  
     //去除title   
@@ -42,11 +45,11 @@ public class BlowDialog extends Activity{
       final LinearLayout dynamic = (LinearLayout) findViewById(R.id.dynamic);
 	    layout = (LinearLayout) inflater.inflate(
         R.layout.blow_end, null).findViewById(R.id.blowend);
-        cancelBt = (Button) layout.findViewById(R.id.b1);
+        blowEndBt = (Button) layout.findViewById(R.id.b1);
        //  retryBt = (Button) layout.findViewById(R.id.b2);
        mIntent  = new Intent();
-       returnButton = (Button)findViewById(R.id.returnButton);  
-      inputEditor = (TextView)findViewById(R.id.et);  
+       blowCancelBt = (Button)findViewById(R.id.returnButton);  
+       blowTips = (TextView)findViewById(R.id.et);  
       final Handler handler = new Handler()
       {	
     	  @Override
@@ -54,20 +57,23 @@ public class BlowDialog extends Activity{
     	  {
     		  if(msg.what == 3)
     		  {
-    			  inputEditor.setText("吹力十足："+ msg.arg1);
-    			  if(msg.arg1>ultDb)
+    			  blowTips.setText("吹力十足："+ msg.arg1);
+    			  if(msg.arg1> ultDb)
     				  ultDb = msg.arg1;
     			  
     		  }
     		  if(msg.what == 4)
     		  {
-    			  inputEditor.setText("您的最终吹力："+ ultDb+"\n"+
+    			  blowTips.setText("您的最终吹力："+ ultDb+"\n"+
     					 "您的广告已经被吹飞了^v^");
     			  
-                  mIntent.putExtra("lich", ultDb);  
-    			  ultDb = 0;
+                  if(ultDb !=0)
+                   transDb = ultDb;
+                  BlowDialog.this.setResult(Constants.BLOW_UP_OK, mIntent);  
+
+                   ultDb = 0;
     		      LinearLayout.LayoutParams lp =  new LinearLayout.LayoutParams(LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.FILL_PARENT,1);
-    		       cancelBt.setLayoutParams(lp);
+    		       blowEndBt.setLayoutParams(lp);
     		       layout.setLayoutParams(lp);   
     		       dynamic.removeAllViews(); 
     		       dynamic.addView(layout);
@@ -77,22 +83,16 @@ public class BlowDialog extends Activity{
     	  
       };
       
-   cancelBt.setOnClickListener(new OnClickListener() {  
+   blowEndBt.setOnClickListener(new OnClickListener() {  
        public void onClick(View v) {  
-    	   	 
-              // 设置结果，并进行传送  
-              BlowDialog.this.setResult(0, mIntent);  
+           BlowDialog.this.setResult(Constants.BLOW_UP_OK, mIntent);  
     	   BlowDialog.this.finish();
        }  
    });   
-   returnButton.setOnClickListener(new OnClickListener() {  
+   blowCancelBt.setOnClickListener(new OnClickListener() {  
           public void onClick(View v) {  
-        	
-           //   mIntent.putExtra("lich", ultDb);  
-              // 设置结果，并进行传送  
-              BlowDialog.this.setResult(0, mIntent);  
+              BlowDialog.this.setResult(Constants.BLOW_UP_CANCEL, mIntent);  
         	  BlowDialog.this.finish();   
-
           }  
       });  
    
@@ -103,7 +103,14 @@ public class BlowDialog extends Activity{
 	@Override
 	public void onBackPressed() {
 		super.onBackPressed();
+
+         // 设置结果，并进行传送  
+         BlowDialog.this.setResult(0, mIntent);  
+   	     BlowDialog.this.finish();   
+
+		
 	}
-  
-  
+
+
+
 }  
