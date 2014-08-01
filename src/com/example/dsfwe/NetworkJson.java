@@ -78,5 +78,14 @@ public class NetworkJson {
 	  	    return IOUtil.json2Obj(json, new TypeReference<ApiResult<List<TagItem>>>(){});
 
 	  }
-	  
+	  public static ApiResult<BlowItem>  getWeiZhanBlowFlag(Context ctx,String wzName,String adId){
+	  {
+			ApiParams params = new ApiParams();
+	        params.addParam("wz", wzName);
+		  	params.addParam("adid",adId);
+	  	    String json = BaseApiCommand.createCommand("weizhan.chui/", false, params).executeSync(ctx);
+
+	  	    return IOUtil.json2Obj(json, new TypeReference<ApiResult<BlowItem>>(){});
+	  }
+		  }
 }

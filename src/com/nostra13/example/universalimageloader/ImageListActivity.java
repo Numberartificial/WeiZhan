@@ -48,14 +48,7 @@ import com.baixing.network.api.ApiConfiguration;
 import com.custom.vg.list.CustomListView;
 import com.custom.vg.list.OnItemClickListenerTag;
 import com.custom.vg.list.OnItemLongClickListenerTag;
-<<<<<<< HEAD
-import com.example.dsfwe.AdItem;
-import com.example.dsfwe.NetworkJson;
-import com.example.dsfwe.TagAdapter;
-import com.example.dsfwe.TagItem;
-=======
 
->>>>>>> ed786fb7cc5466bbdd4209b3c20a57fb2d9962e4
 import com.nostra13.example.universalimageloader.Constants.Extra;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
@@ -130,17 +123,17 @@ public class ImageListActivity extends ListViewBaseActivity{
 	private final int TAG_SHRINK_UP = 1;
 	private int lastTag = -1;
 	private String lastBgColor;
-	
-<<<<<<< HEAD
+	private boolean network_state_ok = false;
+
 	Context activity = this;
-=======
+	
+	
 	private BlowItem blowItem;
 	private int blow_times = 0;
 	private String blowAdId = null;
 	private AdItem blowAdItem = null;
 	private int BLOW_FLAG=0;
 	private RelativeLayout blow_adCard;
->>>>>>> ed786fb7cc5466bbdd4209b3c20a57fb2d9962e4
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -183,7 +176,6 @@ public class ImageListActivity extends ListViewBaseActivity{
 		
 		adlist = new ArrayList<AdItem>();
 		listView = (XListView) findViewById(R.id.xListView);
-		listView.setFastScrollEnabled(true);  
 		listView.setClickable(true);
 		listView.setPullLoadEnable(true);
 		mAdapter = new InfoAdapter(ImageListActivity.this, adlist);
@@ -218,6 +210,8 @@ public class ImageListActivity extends ListViewBaseActivity{
 		});*/
 		//只显示一行tag数据。
 		flag = TAG_LOAD_MORE;	
+		blowItem = new BlowItem();
+		network_state_ok = NetworkState.checkNetworkInfo(activity);
 		
 		WindowManager wm = (WindowManager) this.getSystemService(Context.WINDOW_SERVICE);
 		mainView = (RelativeLayout) this.findViewById(R.id.list_main);
@@ -262,18 +256,18 @@ public class ImageListActivity extends ListViewBaseActivity{
 		coverView = (LinearLayout)findViewById(R.id.ac_image_cover);
 		
 		
+//	
+//		blow_adCard = new RelativeLayout(this);
+//		RelativeLayout.LayoutParams blow_rl = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
+//		blow_rl.topMargin = DensityUtil.dip2px(this, 100);;
+//		blow_rl.leftMargin = DensityUtil.dip2px(this, 100);
+//		
+//		blow_adCard.setLayoutParams(blow_rl);
+//		blow_adCard.setFocusable(false);
+//		blow_adCard.setClickable(false);
+//		blow_adCard.setBackgroundResource(R.drawable.btn_handler);
 	
-		blow_adCard = new RelativeLayout(this);
-		RelativeLayout.LayoutParams blow_rl = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT);
-		blow_rl.topMargin = DensityUtil.dip2px(this, 100);;
-		blow_rl.leftMargin = DensityUtil.dip2px(this, 100);
-		
-		blow_adCard.setLayoutParams(blow_rl);
-		blow_adCard.setFocusable(false);
-		blow_adCard.setClickable(false);
-		blow_adCard.setBackgroundResource(R.drawable.btn_handler);
-		
-		mainView.addView(blow_adCard);
+//		mainView.addView(blow_adCard);
 
 		//添加handle
 		ani_handle = new RelativeLayout(this);
@@ -350,6 +344,8 @@ public class ImageListActivity extends ListViewBaseActivity{
 		// 记录下正常显示时tagsView的BottomMargin
 		mMargin = lp1.topMargin;
 	}
+	
+	
 	public class MyAnimation extends Animation {
         private int y;
         private int lastAdd;
@@ -423,9 +419,6 @@ public class ImageListActivity extends ListViewBaseActivity{
 	public void onBackPressed() {
 		super.onBackPressed();
 	}
-<<<<<<< HEAD
-
-=======
 	@Override
 	public void onActivityResult(int requestCode,int resultCode,Intent intent)
 	{	
@@ -442,7 +435,6 @@ public class ImageListActivity extends ListViewBaseActivity{
 		
 		
 	}
->>>>>>> ed786fb7cc5466bbdd4209b3c20a57fb2d9962e4
 	private void startImagePagerActivity(int position, List<String> urls) {
 		Intent intent = new Intent(this, ImagePagerActivity.class);
 		imageUrls = (String[])urls.toArray(new String[0]);
@@ -505,6 +497,8 @@ public class ImageListActivity extends ListViewBaseActivity{
 		public View getView(int position, View convertView, ViewGroup parent){
 			View view = convertView;
 			final ViewHolder holder;
+			final int pos = position;
+
 			if (convertView == null) {
 				view = inflater.inflate(R.layout.item_list_image, parent, false);
 				holder = new ViewHolder();
@@ -570,10 +564,6 @@ public class ImageListActivity extends ListViewBaseActivity{
 				@Override
 				public void onClick(View v) {
 					// TODO Auto-generated method stub
-<<<<<<< HEAD
-					popWindowDo();
-				}});
-=======
 					//popWindowDo();
 					//popWindowDo();
 				if(network_state_ok)
@@ -598,7 +588,6 @@ public class ImageListActivity extends ListViewBaseActivity{
 					Toast.makeText(activity, "网络连接失败", Toast.LENGTH_SHORT).show();
 				}
 		}});
->>>>>>> ed786fb7cc5466bbdd4209b3c20a57fb2d9962e4
 			return view;
 		}
 
@@ -649,6 +638,35 @@ public class ImageListActivity extends ListViewBaseActivity{
 		}
 		task.execute(wzName);
 	}
+	public void onBlowUp()
+	{
+
+		DownBlowFlagTask task = new DownBlowFlagTask(activity);
+		task.execute(wzName);
+	}
+	public void executeBlowUp()
+	{
+		if(blowItem!=null && blowItem.getFlag())
+		{
+			if(blow_times < 1)
+			{	
+				blow_times++;
+				adlist.remove(blowAdItem);
+				adlist.add(0,blowAdItem);
+				mAdapter.notifyDataSetChanged();
+				//Toast.makeText(activity, "吹上去了，", Toast.LENGTH_SHORT).show();
+			}
+			else
+			{
+				Toast.makeText(activity, "气用完了，还想吹？快邀请好友下载App来吹吧", Toast.LENGTH_SHORT).show();
+			}
+		}
+		else
+		{
+			Toast.makeText(activity, "吹失败了，网络错误", Toast.LENGTH_SHORT).show();
+		}
+		
+	}
 
 	private void onLoad() {
 		listView.stopRefresh();
@@ -657,25 +675,21 @@ public class ImageListActivity extends ListViewBaseActivity{
 	}
 	
 	public void onRefresh() {
-		geneItems(REFRESH);
-		/*mHandler.postDelayed(new Runnable() {
+		mHandler.postDelayed(new Runnable() {
 			@Override
 			public void run() {
 				geneItems(REFRESH);
 			}
-		}, delay_time);*/
+		}, delay_time);
 	}
 
 	public void onLoadMore() {
-
-		geneItems(LOAD);
-		/*
 		mHandler.postDelayed(new Runnable() {
 			@Override
 			public void run() {
 				geneItems(LOAD);
 			}
-		}, delay_time);*/
+		}, delay_time);
 	}
 	
 	public boolean onTouch(MotionEvent ev){
@@ -727,6 +741,50 @@ public class ImageListActivity extends ListViewBaseActivity{
 		return isFinished;
 	}
 
+	private class DownBlowFlagTask extends AsyncTask<String,String,BlowItem>
+	{
+		 Context ctx;
+		public DownBlowFlagTask(Context ctx)
+		{
+			this.ctx = ctx;
+		}
+
+		@Override
+		protected BlowItem doInBackground(String... arg0) {
+			try{
+					if(wzName == "")
+					{
+						return null;
+					}
+					else
+					{	
+					    blowItem= NetworkJson.getWeiZhanBlowFlag(ctx, wzName,blowAdId).getResult();	
+						return blowItem;
+					}
+			}catch(Exception e){
+					
+				e.printStackTrace();
+			}
+			return null;
+		}
+		
+		  @Override  
+	      protected void onPostExecute(BlowItem result) {  	
+			  if(blowItem ==null ) blowItem = new BlowItem();
+			  if(result != null)
+			    {	
+			    	 blowItem = result;
+			    	 executeBlowUp();
+			    
+			    }
+			    else
+			    {
+			    	 	//taglist.set(0, new TagItem("您还没有自己的标签，快去创建吧."));
+			    	Toast.makeText(activity, "网络连接失败啦,请检查网络", Toast.LENGTH_SHORT).show();
+			    }
+			    //ShowTagListView();
+	       }  
+	}
 	
 	
 	private class DownTagTask extends AsyncTask<String,String,List<TagItem>>
@@ -911,5 +969,6 @@ public class ImageListActivity extends ListViewBaseActivity{
 			     onLoad();
 	        }  
 		}
+	
 
 }

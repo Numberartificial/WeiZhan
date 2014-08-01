@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>  
+<LinearLayout  
+  xmlns:android="http://schemas.android.com/apk/res/android"  
+  android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" 
+    android:background="#f5f5f5"
+  >  
+ <RelativeLayout
+  android:orientation="horizontal"  
+  android:layout_width="fill_parent"  
+  android:layout_height="wrap_content"
+  android:background="@drawable/bg_title"
+  android:minHeight="150dip"
+  
+  >
+  <TextView   
+    android:id="@+id/et"  
+    android:layout_width="wrap_content"  
+    android:layout_height="wrap_content"  
+         android:layout_centerVertical="true"
+            android:layout_marginLeft="20dp"
+            android:paddingRight="5dp"
+            android:textSize="25sp"
+        android:textColor="#333333"
+        android:layout_centerInParent="true"
+      android:text="用力吹吧" 
+    
+    />   
+    <ImageView   
+    android:id="@+id/cancelButton"  
+   android:background="@drawable/btn_my"
+    android:layout_alignParentRight="true"   
+      android:layout_marginRight="20dp"
+        android:textSize="21sp"
+      android:textColor="#fe7701"
+ 			android:layout_width="32dip"
+        android:layout_height="32dip"
+        android:layout_marginTop="20dp"   
+       android:layout_marginBottom="20dp"      
+           
+    />        
+ </RelativeLayout>
+ <LinearLayout
+     android:id="@+id/dynamic"  
+    android:layout_width="fill_parent"  
+    android:layout_height="fill_parent" >
+     
+    <Button   
+    android:id="@+id/returnButton"  
+    android:layout_width="fill_parent"  
+    android:layout_height="fill_parent" 
+    android:text="不想吹啦" 
+    android:textSize="25sp"
+    android:minHeight="50dip"    
+    android:background="#f5f5f5"
+    />      
+    </LinearLayout>
+</LinearLayout>  
