@@ -49,9 +49,12 @@ import com.custom.vg.list.CustomListView;
 import com.custom.vg.list.OnItemClickListenerTag;
 import com.custom.vg.list.OnItemLongClickListenerTag;
 import com.example.dsfwe.AdItem;
+import com.example.dsfwe.BlowItem;
 import com.example.dsfwe.NetworkJson;
 import com.example.dsfwe.TagAdapter;
 import com.example.dsfwe.TagItem;
+import com.example.yuyin.BlowDialog;
+import com.example.yuyin.NetworkState;
 import com.nostra13.example.universalimageloader.Constants.Extra;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
@@ -117,8 +120,16 @@ public class ImageListActivity extends ListViewBaseActivity{
 	private final int TAG_SHRINK_UP = 1;
 	private int lastTag = -1;
 	private String lastBgColor;
-	
+	private boolean network_state_ok = false;
+
 	Context activity = this;
+	
+	
+	private BlowItem blowItem;
+	private int blow_times = 0;
+	private String blowAdId = null;
+	private AdItem blowAdItem = null;
+	private int BLOW_FLAG=0;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -195,6 +206,8 @@ public class ImageListActivity extends ListViewBaseActivity{
 		});*/
 		//只显示一行tag数据。
 		flag = TAG_LOAD_MORE;	
+		blowItem = new BlowItem();
+		network_state_ok = NetworkState.checkNetworkInfo(activity);
 		
 		WindowManager wm = (WindowManager) this.getSystemService(Context.WINDOW_SERVICE);
 		mainView = (RelativeLayout) this.findViewById(R.id.list_main);
@@ -447,6 +460,8 @@ public class ImageListActivity extends ListViewBaseActivity{
 		public View getView(int position, View convertView, ViewGroup parent){
 			View view = convertView;
 			final ViewHolder holder;
+			final int pos = position;
+
 			if (convertView == null) {
 				view = inflater.inflate(R.layout.item_list_image, parent, false);
 				holder = new ViewHolder();
@@ -512,7 +527,23 @@ public class ImageListActivity extends ListViewBaseActivity{
 				@Override
 				public void onClick(View v) {
 					// TODO Auto-generated method stub
-					popWindowDo();
+					//popWindowDo();
+					//popWindowDo();
+					blowAdId = getItem(pos).getId();
+					if(blowAdId!=null)
+						blowAdId = blowAdId.substring(1,blowAdId.length());
+					blowAdItem = getItem(pos);
+
+				  if(blow_times<1){    
+					  	//启动吹的功能模块。
+		                Intent i = new Intent(activity, BlowDialog.class);  
+		                startActivityForResult(i,BLOW_FLAG);  
+					  
+				  }
+				  else
+				  {
+					  executeBlowUp();
+				  }
 				}});
 			return view;
 		}
@@ -563,6 +594,35 @@ public class ImageListActivity extends ListViewBaseActivity{
 			task = new DownAdTask(activity,size,size + num - 1,null, doWhat);
 		}
 		task.execute(wzName);
+	}
+	public void onBlowUp()
+	{
+
+		DownBlowFlagTask task = new DownBlowFlagTask(activity);
+		task.execute(wzName);
+	}
+	public void executeBlowUp()
+	{
+		if(blowItem!=null && blowItem.getFlag())
+		{
+			if(blow_times < 1)
+			{	
+				blow_times++;
+				adlist.remove(blowAdItem);
+				adlist.add(0,blowAdItem);
+				mAdapter.notifyDataSetChanged();
+				//Toast.makeText(activity, "吹上去了，", Toast.LENGTH_SHORT).show();
+			}
+			else
+			{
+				Toast.makeText(activity, "气用完了，还想吹？快邀请好友下载App来吹吧", Toast.LENGTH_SHORT).show();
+			}
+		}
+		else
+		{
+			Toast.makeText(activity, "吹失败了，网络错误", Toast.LENGTH_SHORT).show();
+		}
+		
 	}
 
 	private void onLoad() {
@@ -638,6 +698,50 @@ public class ImageListActivity extends ListViewBaseActivity{
 		return isFinished;
 	}
 
+	private class DownBlowFlagTask extends AsyncTask<String,String,BlowItem>
+	{
+		 Context ctx;
+		public DownBlowFlagTask(Context ctx)
+		{
+			this.ctx = ctx;
+		}
+
+		@Override
+		protected BlowItem doInBackground(String... arg0) {
+			try{
+					if(wzName == "")
+					{
+						return null;
+					}
+					else
+					{	
+					    blowItem= NetworkJson.getWeiZhanBlowFlag(ctx, wzName,blowAdId).getResult();	
+						return blowItem;
+					}
+			}catch(Exception e){
+					
+				e.printStackTrace();
+			}
+			return null;
+		}
+		
+		  @Override  
+	      protected void onPostExecute(BlowItem result) {  	
+			  if(blowItem ==null ) blowItem = new BlowItem();
+			  if(result != null)
+			    {	
+			    	 blowItem = result;
+			    	 executeBlowUp();
+			    
+			    }
+			    else
+			    {
+			    	 	//taglist.set(0, new TagItem("您还没有自己的标签，快去创建吧."));
+			    	Toast.makeText(activity, "网络连接失败啦,请检查网络", Toast.LENGTH_SHORT).show();
+			    }
+			    //ShowTagListView();
+	       }  
+	}
 	
 	
 	private class DownTagTask extends AsyncTask<String,String,List<TagItem>>
