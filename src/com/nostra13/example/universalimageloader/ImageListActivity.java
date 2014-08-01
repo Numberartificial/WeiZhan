@@ -324,6 +324,8 @@ public class ImageListActivity extends ListViewBaseActivity{
 		// 记录下正常显示时tagsView的BottomMargin
 		mMargin = lp1.topMargin;
 	}
+	
+	
 	public class MyAnimation extends Animation {
         private int y;
         private int lastAdd;
@@ -397,7 +399,24 @@ public class ImageListActivity extends ListViewBaseActivity{
 	public void onBackPressed() {
 		super.onBackPressed();
 	}
-
+	@Override
+	public void onActivityResult(int requestCode,int resultCode,Intent intent)
+	{
+		if(requestCode == BLOW_FLAG)
+		{
+			//Bundle data = intent.getExtras();
+			//int 
+			int data = intent.getIntExtra("lich", 0);
+			if(data>0)
+			{
+				//Toast.makeText(activity, "您的吹力是：" + data,Toast.LENGTH_SHORT).show();
+				onBlowUp();
+			}
+			
+		}
+		
+		
+	}
 	private void startImagePagerActivity(int position, List<String> urls) {
 		Intent intent = new Intent(this, ImagePagerActivity.class);
 		imageUrls = (String[])urls.toArray(new String[0]);
